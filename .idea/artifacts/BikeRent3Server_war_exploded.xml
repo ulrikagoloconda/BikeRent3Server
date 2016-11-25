@@ -1,0 +1,37 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="BikeRent3Server:war exploded">
+    <output-path>$PROJECT_DIR$/classes/artifacts/BikeRent3Server_war_exploded</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="BikeRent3Server" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="module" name="aopalliance-repackaged-2.5.0-b05.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="hk2-api-2.5.0-b05.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="hk2-locator-2.5.0-b05.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="hk2-utils-2.5.0-b05.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="javassist-3.20.0-GA.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="javax.annotation-api-1.2.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="javax.inject-2.5.0-b05.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="javax.ws.rs-api-2.0.1.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="jaxb-api-2.2.7.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="jersey-client.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="jersey-common.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="jersey-container-servlet-core.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="jersey-container-servlet.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="jersey-guava-2.24.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="jersey-media-jaxb.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="jersey-server.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="org.osgi.core-4.2.0.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="osgi-resource-locator-1.0.1.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="persistence-api-1.0.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="validation-api-1.1.0.Final.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="gson-2.8.0.jar" module-name="BikeRent3Server" />
+          <element id="library" level="module" name="mysql-connector-java-5.1.39-bin.jar" module-name="BikeRent3Server" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="BikeRent3Server/web/Web" />
+    </root>
+  </artifact>
+</component>

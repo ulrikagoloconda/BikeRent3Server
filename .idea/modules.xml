@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GitHub_BikeRent3Server.iml" filepath="$PROJECT_DIR$/GitHub_BikeRent3Server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BikeRent3Server.iml" filepath="$PROJECT_DIR$/BikeRent3Server.iml" />
     </modules>
   </component>
 </project>

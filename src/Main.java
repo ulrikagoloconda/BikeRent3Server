@@ -3,13 +3,13 @@ import com.google.gson.Gson;
 import Model.BikeUser;
 import REST.RestRoot;
 
-//Denna klass ska bara användas för att testköra metoder
+//Denna klass ska bara anvï¿½ndas fï¿½r att testkï¿½ra metoder
 public class Main {
 	public static void main(String [] args){
-		System.out.println("Obs, körs från main och inte som server ");
+		System.out.println("Obs, kï¿½rs frï¿½n main och inte som server ");
 		RestRoot rr = new RestRoot();
 		Gson gson = new Gson();
-	System.out.println("Körs detta ");
+	System.out.println("Kï¿½rs detta ");
 		BikeUser user = new BikeUser();
 		user.setUserName("GoloGolo");
 		user.setPassw("GoloGolo");

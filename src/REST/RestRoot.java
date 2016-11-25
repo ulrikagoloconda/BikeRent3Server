@@ -24,14 +24,15 @@ public class RestRoot{
 	    private BikeUser currentUser;
 
 	@GET
-	@Produces(MediaType.APPLICATION_XML)
+	@Produces(MediaType.TEXT_PLAIN)
 	public String getTest(){
 		System.out.println("I getmetoden ");
 		String s = "hejsan";
 		return s;
 		
 	}	
-	
+
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -48,5 +49,6 @@ public class RestRoot{
 		}
 	
 		return gson.toJson(currentUser);
-	}	
+	}
+
 }
