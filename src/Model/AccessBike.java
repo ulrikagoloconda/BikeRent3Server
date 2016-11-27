@@ -1,9 +1,16 @@
 package Model;
 
+import com.mysql.jdbc.*;
+import helpers.PCRelated;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.sql.*;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,12 +86,13 @@ public class AccessBike {
         ArrayList<Bike> availableBikes = new ArrayList<>();
         DBType dataBase = null;
         Connection conn = null;
-        if (helpers.PCRelated.isThisNiklasPC()) {
+        if (PCRelated.isThisNiklasPC()) {
             dataBase = DBType.Niklas;
         } else {
             dataBase = DBType.Ulrika;
         }
         try {
+            Class.forName("com.mysql.jdbc.Driver");
             conn = DBUtil.getConnection(dataBase);
             conn.setAutoCommit(false);
             String sql = "CALL search_available_bikes()";
@@ -112,6 +120,7 @@ public class AccessBike {
 
         } catch (Exception e) {
             try {
+                e.printStackTrace();
                 conn.rollback();
             } catch (SQLException e1) {
                 e1.printStackTrace();

@@ -3,6 +3,7 @@ package Model;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
@@ -10,7 +11,7 @@ import java.time.LocalDate;
  * @version 1.0
  * @since 2016-09-15
  */
-public class Bike {
+public class Bike{
   private int bikeID;
   private String brandName;
   private int modelYear;

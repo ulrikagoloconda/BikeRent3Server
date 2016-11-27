@@ -57,6 +57,7 @@ static {
     switch (dbType) {
       case Ulrika:
         System.out.println("Ulrikas inloggning");
+
         return DriverManager.getConnection(credMap.get("CONN_STRING_Ulrika"), credMap.get("USERNAME_Ulrika"), credMap.get("PASSWORD_Ulrika"));
 
       case Niklas:

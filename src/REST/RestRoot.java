@@ -32,9 +32,18 @@ public class RestRoot{
        Gson gson = new Gson();
       ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
 
-        System.out.println(availableBikes);
-      // String json = gson.toJson(b);
-		String s = "hejsan";
+       System.out.println(availableBikes);
+        Bike b = availableBikes.get(0);
+
+       /* try {
+            System.out.println("Körs detta i try");
+            String json = gson.toJson(b);
+            System.out.println("utskrift av json" + json);
+        }catch (Exception e){
+            System.out.println("Eller körs chatch? ");
+            e.printStackTrace();
+        }*/
+        String s = "hejsan ";
 		return s;
 		
 	}	
