@@ -2,6 +2,7 @@
 package REST;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -10,6 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import Model.Bike;
 import com.google.gson.Gson;
 
 import Interfaces.DBAccess;
@@ -27,6 +29,11 @@ public class RestRoot{
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getTest(){
 		System.out.println("I getmetoden ");
+       Gson gson = new Gson();
+      ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+
+        System.out.println(availableBikes);
+      // String json = gson.toJson(b);
 		String s = "hejsan";
 		return s;
 		

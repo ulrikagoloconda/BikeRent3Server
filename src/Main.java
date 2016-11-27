@@ -15,5 +15,6 @@ public class Main {
 		user.setPassw("GoloGolo");
 		String json = gson.toJson(user);
 	System.out.println(rr.loginBikeUser(json));
+		rr.getTest();
 	}
 }
