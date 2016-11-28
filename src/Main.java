@@ -8,21 +8,21 @@ import REST.RestRoot;
 
 import java.util.ArrayList;
 
-//Denna klass ska bara anv�ndas f�r att testk�ra metoder
+//Denna klass ska bara anvndas fr att testkra metoder
 public class Main {
 	private static DBAccess dbAccess = new DBAccessImpl();
 	public static void main(String [] args){
-		System.out.println("Obs, k�rs fr�n main och inte som server ");
+		System.out.println("Obs, körs från main och inte som server ");
 		ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
 		System.out.println(" avilable " + availableBikes);
 		RestRoot rr = new RestRoot();
 		Gson gson = new Gson();
-	System.out.println("K�rs detta ");
+	System.out.println("Körs detta ");
 		BikeUser user = new BikeUser();
-		user.setUserName("GoloGolo");
-		user.setPassw("GoloGolo");
+    user.setUserName("cykeltur");
+		user.setPassw("12345");
 		String json = gson.toJson(user);
 	System.out.println(rr.loginBikeUser(json));
-		rr.getTest();
+		//rr.getTest();
 	}
 }

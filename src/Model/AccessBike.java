@@ -1,16 +1,11 @@
 package Model;
 
-import com.mysql.jdbc.*;
 import helpers.PCRelated;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.sql.*;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +17,7 @@ import java.util.Map;
  * @since 2016-09-16
  */
 public class AccessBike {
+
     public static int returnBike(int bikeID, int userID) {
         System.out.println("bike " + bikeID + " user " + userID);
         DBType dataBase = null;
@@ -83,7 +79,12 @@ public class AccessBike {
     }
 
     public static ArrayList<Bike> selectAvailableBikes() {
-        ArrayList<Bike> availableBikes = new ArrayList<>();
+      try {
+        Class.forName("com.mysql.jdbc.Driver");
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+      }
+      ArrayList<Bike> availableBikes = new ArrayList<>();
         DBType dataBase = null;
         Connection conn = null;
         if (PCRelated.isThisNiklasPC()) {
