@@ -1,30 +1,32 @@
 
 package REST;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import Model.Bike;
+import Model.*;
 import com.google.gson.Gson;
 
 import Interfaces.DBAccess;
-import Model.BikeUser;
-import Model.DBAccessImpl;
-import Model.JDBCConnection;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.sun.jersey.multipart.MultiPart;
 
 @Path("/resources")
-public class RestRoot{
-	 	private JDBCConnection jdbcConnection;
-	    private DBAccess dbAccess = new DBAccessImpl();
-	    private BikeUser currentUser;
+public class RestRoot {
+    private JDBCConnection jdbcConnection;
+    private DBAccess dbAccess = new DBAccessImpl();
+    private BikeUser currentUser;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)//(MediaType.TEXT_PLAIN)
-    public String getTest(){
+    public String getTest() {
         System.out.println("I getmetoden ");
         //String indataString = convertStreamToString(incomingData);
         //System.out.println(indataString);
@@ -52,29 +54,63 @@ public class RestRoot{
         System.out.println("");
         String s = "HHejsan från restRoot ";
         return json;//s;
-		
-	}	
+
+    }
 
 
-	@POST
-   // @Path("{inputJsonObj}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.TEXT_PLAIN)
-	public String loginBikeUser(String json) {
-        //@PathParam("userName") String userName, @PathParam("passw") String passw
-        //@Path("{userName}/ {passw}")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String loginBikeUser(String json) {
         System.out.println("I postmetoden " + json);
-       // System.out.println( json.toString());
-		Gson gson = new Gson();
-		BikeUser user = new BikeUser();
-	    user.setUserID(0);
-		try {
-			currentUser = dbAccess.logIn("GoloGolo", "GoloGolo");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	
-		return gson.toJson(currentUser);
-	}
+        Gson gson = new Gson();
+        BikeUser user;
+        user = gson.fromJson(json, BikeUser.class);
+        user.setUserID(0);
+        System.out.println(user.getUserName());
+        try {
+            currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
+           /* ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
+            Bike currentBIke = dbAccess.getBikeByID(currentBikesID.get(0));
+            //currentUser.setRentedBIke(currentBIke);
+            currentBIke.setBufferedImage(null);
+            System.out.println(currentBIke);*/
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String jsonUser = gson.toJson(user);
+        System.out.println(jsonUser);
+        return jsonUser;
+    }
+
+
+    @Path("downloadfile")
+    @Produces("multipart/mixed")
+    @GET
+    public Response getFile() {
+        System.out.println("gi getfile ");
+
+        MultiPart objMultiPart = new MultiPart();
+        try {
+            ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
+            Bike currentBIke = dbAccess.getBikeByID(currentBikesID.get(0));
+
+            File outputfile = new File("image.jpg");
+            ImageIO.write(currentBIke.getBufferedImage(), "jpg", outputfile);
+
+            objMultiPart.type(new MediaType("multipart", "mixed"));
+            objMultiPart
+                    .bodyPart(outputfile.getName(), new MediaType("text", "plain"));
+            objMultiPart.bodyPart("" + outputfile.length(), new MediaType("text",
+                    "plain"));
+            objMultiPart.bodyPart(outputfile, new MediaType("multipart", "mixed"));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return Response.ok(objMultiPart).build();
+
+    }
 
 }
+

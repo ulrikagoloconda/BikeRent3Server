@@ -17,6 +17,8 @@ public class BikeUser {
   private int phone;
   private LocalDate memberSince;
   private String passw;
+  private BikeMock rentedBIke;
+
   public BikeUser() {
 
   }
@@ -95,13 +97,20 @@ public class BikeUser {
     this.userName = userName;
   }
 
-public String getPassw() {
-	return passw;
-}
+  public String getPassw() {
+    return passw;
+  }
 
-public void setPassw(String passw) {
-	this.passw = passw;
-}
-  
+  public void setPassw(String passw) {
+    this.passw = passw;
+  }
+
+  public BikeMock getRentedBIke() {
+    return rentedBIke;
+  }
+
+  public void setRentedBIke(BikeMock rentedBIke) {
+    this.rentedBIke = rentedBIke;
+  }
 }
 

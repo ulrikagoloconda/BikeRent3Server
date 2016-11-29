@@ -260,5 +260,7 @@
     </orderEntry>
     <orderEntry type="library" name="mysql-connector-java-5.1.39-bin" level="project" />
     <orderEntry type="library" name="mysql-connector-java-5.1.39-bin (2)" level="project" />
+    <orderEntry type="library" name="jersey-client-2.24.1" level="project" />
+    <orderEntry type="library" name="jersey-multipart-1.19.1" level="project" />
   </component>
 </module>
