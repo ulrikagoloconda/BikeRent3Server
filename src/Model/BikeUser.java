@@ -1,6 +1,7 @@
 package Model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 /**
  * @author Ulrika Goloconda Fahlén
@@ -17,6 +18,8 @@ public class BikeUser {
   private int phone;
   private LocalDate memberSince;
   private String passw;
+  private ArrayList<Bike> currentBikeLoans;
+
   public BikeUser() {
 
   }
@@ -95,13 +98,23 @@ public class BikeUser {
     this.userName = userName;
   }
 
-public String getPassw() {
-	return passw;
-}
+  public String getPassw() {
+    return passw;
+  }
 
-public void setPassw(String passw) {
-	this.passw = passw;
-}
-  
+  public void setPassw(String passw) {
+    this.passw = passw;
+  }
+
+  public ArrayList<Bike> getCurrentBikeLoans() {
+    if(currentBikeLoans==null){
+      currentBikeLoans = new ArrayList<>();
+    }
+    return currentBikeLoans;
+  }
+
+  public void setCurrentBikeLoans(ArrayList<Bike> currentBikeLoans) {
+    this.currentBikeLoans = currentBikeLoans;
+  }
 }
 

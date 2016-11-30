@@ -57,8 +57,12 @@ static {
     switch (dbType) {
       case Ulrika:
         System.out.println("Ulrikas inloggning");
-
-        return DriverManager.getConnection(credMap.get("CONN_STRING_Ulrika"), credMap.get("USERNAME_Ulrika"), credMap.get("PASSWORD_Ulrika"));
+          try {
+              Class.forName("com.mysql.jdbc.Driver");
+          } catch (ClassNotFoundException e) {
+              e.printStackTrace();
+          }
+          return DriverManager.getConnection(credMap.get("CONN_STRING_Ulrika"), credMap.get("USERNAME_Ulrika"), credMap.get("PASSWORD_Ulrika"));
 
       case Niklas:
         System.out.println("Niklas inloggning");

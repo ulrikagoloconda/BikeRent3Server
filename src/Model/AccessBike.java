@@ -58,8 +58,8 @@ public class AccessBike {
             cs.setInt(3, newBike.getModelYear());
             cs.setString(4, newBike.getColor());
             cs.setInt(5, newBike.getSize());
-            ByteArrayInputStream bais = newBike.getImageStream();
-            cs.setBinaryStream(6, bais);
+           //ByteArrayInputStream bais = newBike.getImageStream();
+            //cs.setBinaryStream(6, bais);
 
             cs.executeQuery();
             //cs.execute();
@@ -111,7 +111,7 @@ public class AccessBike {
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
                 BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
-                b.setBufferedImage(theImage);
+               // b.setBufferedImage(theImage);
                 b.setType(rs.getString("typeName"));
                 b.setBrandName(rs.getString("brandname"));
                 b.setImageFileName(rs.getString("imageFileName"));
@@ -316,7 +316,7 @@ public class AccessBike {
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
                 BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
-                b.setBufferedImage(theImage);
+               // b.setBufferedImage(theImage);
                 b.setColor(rs.getString("color"));
                 b.setType(rs.getString("typeName"));
                 b.setModelYear(rs.getInt("modelyear"));
@@ -363,7 +363,7 @@ public class AccessBike {
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
                 BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
-                tempBike.setBufferedImage(theImage);
+               // tempBike.setBufferedImage(theImage);
                 tempBike.setSize(rs.getInt("size"));
                 tempBike.setType(rs.getString("typeName"));
                 tempBike.setBrandName(rs.getString("brandname"));
