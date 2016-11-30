@@ -1,0 +1,9 @@
+Vad händer på servern när fler användare använder programmet?
+Och hur påverkar användadet av sessions av att fler kör programmet samtidigt?
+
+Endpoints:
+login (returnerar userObjekt med currentLoan inbäddat + statistikgrundande intar)
+newUser (startar inte session! returnerar booelan)
+updateUser (returnerar boolean)
+errorEndpiont (Skickar html för sparande i databas, och returnerar en boolean)
+getAvaiableBies (Returnerar lista på objetBike)

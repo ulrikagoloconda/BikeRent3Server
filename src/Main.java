@@ -38,6 +38,9 @@ public class Main {
             System.out.println(i);
             Bike temp = dbAccess.getBikeByID(i);
             System.out.println(temp);
+            Gson gson1 = new Gson();
+            String s =  gson1.toJson(temp);
+            System.out.println(bike);
         }
 		//System.out.println(rr.loginBikeUser(json));
 		//rr.getTest();

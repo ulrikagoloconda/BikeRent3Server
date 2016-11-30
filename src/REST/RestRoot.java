@@ -81,7 +81,7 @@ public class RestRoot {
                 ArrayList<Bike> bikes = new ArrayList<>();
                 for(Integer i : currentBikesID){
                     Bike temp = dbAccess.getBikeByID(i);
-                   // temp.setBufferedImage(null);
+                    System.out.println(temp.getImageStream() + " Läggs det till i objetet");
                     bikes.add(temp);
                 }
                 currentUser.setCurrentBikeLoans(bikes);
@@ -134,8 +134,6 @@ public class RestRoot {
             e.printStackTrace();
         }
         return Response.ok(objMultiPart).build();
-
     }
-
 }
 

@@ -314,8 +314,10 @@ public class AccessBike {
                 b.setBrandName(rs.getString("brandname"));
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
-                BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
+                ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+              //  BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
                // b.setBufferedImage(theImage);
+                b.setImageStream(bis);
                 b.setColor(rs.getString("color"));
                 b.setType(rs.getString("typeName"));
                 b.setModelYear(rs.getInt("modelyear"));
@@ -361,8 +363,11 @@ public class AccessBike {
                 tempBike.setColor(rs.getString("color"));
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
-                BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
-               // tempBike.setBufferedImage(theImage);
+                ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+               // BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
+                System.out.println(bis + " null eller inte? ");
+               tempBike.setImageStream(bis);
+                // tempBike.setBufferedImage(theImage);
                 tempBike.setSize(rs.getInt("size"));
                 tempBike.setType(rs.getString("typeName"));
                 tempBike.setBrandName(rs.getString("brandname"));

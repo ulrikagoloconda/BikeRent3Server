@@ -25,8 +25,8 @@ public class Bike{
   private LocalDate dayOfReturn;
   private LocalDate dayOfRent;
 
- /* private ByteArrayInputStream imageStream;
-  private BufferedImage bufferedImage;
+  private ByteArrayInputStream imageStream;
+ /* private BufferedImage bufferedImage;
   private FileInputStream fileInputImage;
   */
 
@@ -154,4 +154,20 @@ public class Bike{
         getSize() + "\n ************";
   }
 
+    public int getCreatedByUserID() {
+        return createdByUserID;
+    }
+
+    public void setCreatedByUserID(int createdByUserID) {
+        this.createdByUserID = createdByUserID;
+    }
+
+    public ByteArrayInputStream getImageStream() {
+        return imageStream;
+    }
+
+    public void setImageStream(ByteArrayInputStream imageStream) {
+
+        this.imageStream = imageStream;
+    }
 }
