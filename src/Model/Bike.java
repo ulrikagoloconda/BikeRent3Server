@@ -20,13 +20,16 @@ public class Bike{
   private int size;
   private String type;
   private boolean available;
-  private ByteArrayInputStream imageStream;
-  private BikeUser createdBy;
+  private int createdByUserID;
   private String imageFileName;
-  private BufferedImage bufferedImage;
-  private FileInputStream fileInputImage;
   private LocalDate dayOfReturn;
   private LocalDate dayOfRent;
+
+ /* private ByteArrayInputStream imageStream;
+  private BufferedImage bufferedImage;
+  private FileInputStream fileInputImage;
+  */
+
 
 
   public Bike() {
@@ -116,44 +119,12 @@ public class Bike{
     this.brandName = brandName;
   }
 
-  public ByteArrayInputStream getImageStream() {
-    return imageStream;
-  }
-
-  public void setImageStream(ByteArrayInputStream imageStream) {
-    this.imageStream = imageStream;
-  }
-
-  public BikeUser getCreatedBy() {
-    return createdBy;
-  }
-
-  public void setCreatedBy(BikeUser createdBy) {
-    this.createdBy = createdBy;
-  }
-
   public String getImageFileName() {
     return imageFileName;
   }
 
   public void setImageFileName(String imageFileName) {
     this.imageFileName = imageFileName;
-  }
-
-  public BufferedImage getBufferedImage() {
-    return bufferedImage;
-  }
-
-  public void setBufferedImage(BufferedImage bufferedImage) {
-    this.bufferedImage = bufferedImage;
-  }
-
-  public FileInputStream getFileInputImage() {
-    return fileInputImage;
-  }
-
-  public void setFileInputImage(FileInputStream fileInputImage) {
-    this.fileInputImage = fileInputImage;
   }
 
   public LocalDate getDayOfReturn() {

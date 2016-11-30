@@ -22,17 +22,24 @@ public class Main {
 		BikeUser user = new BikeUser();
 		user.setUserName("GoloGolo");
 		user.setPassw("GoloGolo");
-		BikeMock mock = new BikeMock();
-	mock.setAvailable(true);
-		mock.setBikeID(1);
-		mock.setBrandName("MockMonark");
-		mock.setColor("Grön");
-//mock.setBufferedImage(availableBikes.get(0).getBufferedImage());
-		mock.setDayOfRent(LocalDate.now());
-		user.setRentedBIke(mock);
+		Bike bike = new Bike();
+		bike.setAvailable(true);
+		bike.setBikeID(1);
+		bike.setBrandName("MockMonark");
+		bike.setColor("Grön");
+//bike.setBufferedImage(availableBikes.get(0).getBufferedImage());
+		bike.setDayOfRent(LocalDate.now());
 		String json = gson.toJson(user);
-		System.out.println("null eller inte " + json);
-		System.out.println(rr.loginBikeUser(json));
-		rr.getTest();
+		System.out.println("null eller inte " + json );
+        ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(1);
+        ArrayList<Bike> bikes = new ArrayList<>();
+        System.out.println(currentBikesID.size());
+        for(Integer i : currentBikesID) {
+            System.out.println(i);
+            Bike temp = dbAccess.getBikeByID(i);
+            System.out.println(temp);
+        }
+		//System.out.println(rr.loginBikeUser(json));
+		//rr.getTest();
 	}
 }

@@ -6,7 +6,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -61,8 +64,9 @@ public class RestRoot {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
-    public String loginBikeUser(String json) {
+    public String loginBikeUser(String json,@Context HttpServletRequest req) {
         System.out.println("I postmetoden " + json);
+        HttpSession session= req.getSession(true);
         Gson gson = new Gson();
         BikeUser user;
         user = gson.fromJson(json, BikeUser.class);
@@ -70,18 +74,39 @@ public class RestRoot {
         System.out.println(user.getUserName());
         try {
             currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
-           /* ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
-            Bike currentBIke = dbAccess.getBikeByID(currentBikesID.get(0));
-            //currentUser.setRentedBIke(currentBIke);
-            currentBIke.setBufferedImage(null);
-            System.out.println(currentBIke);*/
+            if(currentUser.getUserID()>0) {
+                session.setAttribute("currentUser", currentUser);
+                System.out.println("Currnetuser passw " + currentUser.getPassw());
+                ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
+                ArrayList<Bike> bikes = new ArrayList<>();
+                for(Integer i : currentBikesID){
+                    Bike temp = dbAccess.getBikeByID(i);
+                   // temp.setBufferedImage(null);
+                    bikes.add(temp);
+                }
+                currentUser.setCurrentBikeLoans(bikes);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String jsonUser = gson.toJson(user);
+        String jsonUser = gson.toJson(currentUser);
         System.out.println(jsonUser);
         return jsonUser;
+       /* public String hello(@Context HttpServletRequest req) {
+
+            HttpSession session= req.getSession(true);
+            Object foo = session.getAttribute("foo");
+            if (foo!=null) {
+                System.out.println(foo.toString());
+            } else {
+                foo = "bar";
+                session.setAttribute("foo", "bar");
+            }
+            return foo.toString();
+
+
+        }*/
     }
 
 
@@ -97,7 +122,7 @@ public class RestRoot {
             Bike currentBIke = dbAccess.getBikeByID(currentBikesID.get(0));
 
             File outputfile = new File("image.jpg");
-            ImageIO.write(currentBIke.getBufferedImage(), "jpg", outputfile);
+            //ImageIO.write(currentBIke.getBufferedImage(), "jpg", outputfile);
 
             objMultiPart.type(new MediaType("multipart", "mixed"));
             objMultiPart
