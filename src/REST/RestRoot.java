@@ -71,7 +71,6 @@ public class RestRoot {
         BikeUser user;
         user = gson.fromJson(json, BikeUser.class);
         user.setUserID(0);
-        System.out.println(user.getUserName());
         try {
             currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
             if(currentUser.getUserID()>0) {
@@ -81,10 +80,10 @@ public class RestRoot {
                 ArrayList<Bike> bikes = new ArrayList<>();
                 for(Integer i : currentBikesID){
                     Bike temp = dbAccess.getBikeByID(i);
-                    System.out.println(temp.getImageStream() + " Läggs det till i objetet");
                     bikes.add(temp);
                 }
                 currentUser.setCurrentBikeLoans(bikes);
+              currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
             }
 
         } catch (Exception e) {
@@ -93,22 +92,15 @@ public class RestRoot {
         String jsonUser = gson.toJson(currentUser);
         System.out.println(jsonUser);
         return jsonUser;
-       /* public String hello(@Context HttpServletRequest req) {
-
-            HttpSession session= req.getSession(true);
-            Object foo = session.getAttribute("foo");
-            if (foo!=null) {
-                System.out.println(foo.toString());
-            } else {
-                foo = "bar";
-                session.setAttribute("foo", "bar");
-            }
-            return foo.toString();
-
-
-        }*/
     }
-
+    @GET
+    @Path("/availableBikes")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getAvailableBikes(){
+        System.out.println("körs detta i availableBikes");
+        String json = "tillgängliga cyklar ";
+        return json;
+    }
 
     @Path("downloadfile")
     @Produces("multipart/mixed")
