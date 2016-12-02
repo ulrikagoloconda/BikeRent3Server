@@ -24,7 +24,7 @@ public class AccessUser {
 
   }
 
-  public static BikeUser loginUser(String userName, String tryPassW)  {
+  public static BikeUser loginUser(String userName, String tryPassW) {
     BikeUser returnUser = new BikeUser();
     int userID = 0;
     DBType dataBase = null;
@@ -43,16 +43,16 @@ public class AccessUser {
       cs.registerOutParameter(3, Types.INTEGER);
       ResultSet rs = cs.executeQuery();
       userID = cs.getInt(3);
-        if(userID >0){
-            if(rs.next()){
-                returnUser.setUserID(rs.getInt("userID"));
-                returnUser.setfName(rs.getString("fname"));
-                returnUser.setlName(rs.getString("lname"));
-                returnUser.setUserName(rs.getString("username"));
-                returnUser.setEmail(rs.getString("email"));
-                returnUser.setMemberLevel(rs.getInt("memberlevel"));
-            }
+      if (userID > 0) {
+        if (rs.next()) {
+          returnUser.setUserID(rs.getInt("userID"));
+          returnUser.setfName(rs.getString("fname"));
+          returnUser.setlName(rs.getString("lname"));
+          returnUser.setUserName(rs.getString("username"));
+          returnUser.setEmail(rs.getString("email"));
+          returnUser.setMemberLevel(rs.getInt("memberlevel"));
         }
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -226,6 +226,31 @@ public class AccessUser {
     }
 
     return false;
+  }
+
+  public static boolean startSession(String auth, int userID) {
+    boolean returnBool = false;
+    DBType dataBase = null;
+    if (helpers.PCRelated.isThisNiklasPC()) {
+      dataBase = DBType.Niklas;
+    } else {
+      dataBase = DBType.Ulrika;
+    }
+    try {
+      String sql = "INSERT INTO active_session (session_token, userID) VALUES (?,?)";
+      Connection conn = DBUtil.getConnection(dataBase);
+      PreparedStatement stmt = conn.prepareStatement(sql);
+      stmt.setString(1, auth);
+      stmt.setInt(2, userID);
+      returnBool = stmt.execute();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return returnBool;
+  }
+
+  public static String readSessionToken(int userID) {
   }
 }
 

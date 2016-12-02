@@ -83,6 +83,7 @@ public class RestRoot {
         mvi.setTotalBikes(100);
         mvi.setRentedBikes(20);
         String s = AuthHelper.generateValidationToken();
+        dbAccess.startSession(s, currentUser.getUserID());
         mvi.setAuthToken(s);
         System.out.println("token "+s);
         String jsonUser = gson.toJson(mvi);
@@ -93,10 +94,15 @@ public class RestRoot {
     @GET
     @Path("/availableBikes")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getAvailableBikes(@Context HttpServletRequest req){
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getAvailableBikes(String json, @Context HttpServletRequest req){
        try {
            System.out.println("körs detta i availableBikes");
            Gson gson = new Gson();
+           MainViewInformaiton mvi = gson.fromJson(json,MainViewInformaiton.class);
+           String token = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+           if(mvi.getAuthToken()==)
+
            ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
            Bikes bikeCollection = new Bikes();
            bikeCollection.setBikes(availableBikes);

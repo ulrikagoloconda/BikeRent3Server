@@ -117,4 +117,14 @@ public class DBAccessImpl implements DeleteUser, InsertNewUser, DBAccess {
     public ArrayList<Bike> getCurrentBikesByUserID(int userID) {
         return AccessBike.getCurrentBikesByUserID(userID);
     }
+
+    @Override
+    public boolean startSession(String auth, int userID) {
+        return AccessUser.startSession(auth, userID);
+    }
+
+    @Override
+    public String readSessionToken(int userID) {
+        return AccessUser.readSessionToken(userID);
+    }
 }
