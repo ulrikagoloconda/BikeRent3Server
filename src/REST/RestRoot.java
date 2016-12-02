@@ -98,7 +98,13 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     public String getAvailableBikes(){
         System.out.println("körs detta i availableBikes");
+        Gson gson = new Gson();
+       ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+        Bikes bikeCollection = new Bikes();
+        bikeCollection.setBikes(availableBikes);
         String json = "tillgängliga cyklar ";
+        json = gson.toJson(bikeCollection);
+        System.out.println(json);
         return json;
     }
 

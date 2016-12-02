@@ -109,8 +109,8 @@ public class AccessBike {
                 b.setModelYear(rs.getInt("modelyear"));
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
-                BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
-               // b.setBufferedImage(theImage);
+                ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+                b.setImageStream(bis);
                 b.setType(rs.getString("typeName"));
                 b.setBrandName(rs.getString("brandname"));
                 b.setImageFileName(rs.getString("imageFileName"));
