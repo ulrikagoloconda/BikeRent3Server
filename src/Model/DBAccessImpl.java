@@ -132,4 +132,9 @@ public class DBAccessImpl implements DeleteUser, InsertNewUser, DBAccess {
     public void closeSession(int userID) {
         AccessUser.closeSession(userID);
     }
+
+    @Override
+    public boolean isSessionOpen(int userID) {
+        return AccessUser.isSessionOpen(userID);
+    }
 }

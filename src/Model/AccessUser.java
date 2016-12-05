@@ -1,6 +1,8 @@
 package Model;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author Niklas Karlsson
@@ -237,11 +239,13 @@ public class AccessUser {
             dataBase = DBType.Ulrika;
         }
         try {
-            String sql = "INSERT INTO active_session (session_token, userID) VALUES (?,?)";
+            String sql = "INSERT INTO active_session (session_token, userID, opened) VALUES (?,?,now())";
             Connection conn = DBUtil.getConnection(dataBase);
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, auth);
             stmt.setInt(2, userID);
+            LocalDate ld = LocalDate.now();
+            Date d = Date.valueOf(ld);
             returnBool = stmt.execute();
 
         } catch (Exception e) {
@@ -259,16 +263,13 @@ public class AccessUser {
             dataBase = DBType.Ulrika;
         }
         try {
-            System.out.println("Detta körs, i AccessUser innan execute ");
             String sql = "SELECT session_token FROM active_session WHERE userID=? AND closed is null";
             Connection conn = DBUtil.getConnection(dataBase);
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userID);
             ResultSet rs = stmt.executeQuery();
-            System.out.println("Detta körs, i AccessUser efter execute ");
 
             if (rs.next()) {
-                System.out.println("Körs detta, rs.next");
                 returnString = rs.getString("session_token");
             }
         } catch (Exception e) {
@@ -291,6 +292,29 @@ public class AccessUser {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userID);
             returnBool = stmt.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return returnBool;
+    }
+
+    public static boolean isSessionOpen(int userID) {
+        boolean returnBool = false;
+        DBType dataBase = null;
+        if (helpers.PCRelated.isThisNiklasPC()) {
+            dataBase = DBType.Niklas;
+        } else {
+            dataBase = DBType.Ulrika;
+        }
+        try {
+            String sql = "SELECT session_token FROM active_session WHERE userID=? AND closed is null";
+            Connection conn = DBUtil.getConnection(dataBase);
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, userID);
+          ResultSet rs = stmt.executeQuery();
+            if(rs.next()){
+                returnBool= true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

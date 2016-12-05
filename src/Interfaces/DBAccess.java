@@ -37,4 +37,5 @@ public interface DBAccess {
     boolean startSession(String auth, int userID);
     String readSessionToken(int userID);
     void closeSession(int userID);
+    boolean isSessionOpen(int userID);
 }
