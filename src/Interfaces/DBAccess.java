@@ -28,7 +28,7 @@ public interface DBAccess {
     boolean InsertNewUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) throws SQLException;
     ArrayList<Bike> getAllBikes();
     boolean UpdateUser(String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password)throws SQLException;
-    String executeBikeLoan(int bikeID, int userID);
+    Bike executeBikeLoan(int bikeID, int userID);
     Map<String,Integer> getSearchValue(String text);
     Bike getBikeByID(int bikeID);
     ArrayList<Integer> getUsersCurrentBikes(int userID);

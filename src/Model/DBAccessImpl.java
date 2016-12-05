@@ -89,7 +89,7 @@ public class DBAccessImpl implements DeleteUser, InsertNewUser, DBAccess {
   }
 
   @Override
-  public String executeBikeLoan(int bikeID, int userID) {
+  public Bike executeBikeLoan(int bikeID, int userID) {
     return AccessBike.executeBikeLoan(bikeID, userID);
   }
 

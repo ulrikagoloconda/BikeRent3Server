@@ -201,4 +201,26 @@ public class RestRoot {
             return null;
         }
     }
+
+
+    @POST
+    @Path("/executeRental")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String executeBikeRent(String json) {
+        System.out.println("körs detta i executeRental ");
+        Gson gson = new Gson();
+        MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+        String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+        System.out.println(mvi.getCurrentUser().getSessionToken() + " sessionTOken " + clientToken);
+        if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+           Bike returnBike =  dbAccess.executeBikeLoan(mvi.getBikeToRentID(),mvi.getCurrentUser().getUserID());
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(returnBike);
+            return returnJson;
+        } else {
+            return null;
+        }
+
+    }
 }

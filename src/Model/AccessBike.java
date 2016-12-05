@@ -207,11 +207,11 @@ public class AccessBike {
     }
 
 
-    public static String executeBikeLoan(int bikeID, int userID) {
+    public static Bike executeBikeLoan(int bikeID, int userID) {
         DBType dataBase = null;
         Connection conn = null;
         Date dayOfReturn = null;
-        String returnSring = "";
+       Bike returnBike = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
             dataBase = DBType.Niklas;
         } else {
@@ -229,8 +229,11 @@ public class AccessBike {
             cs.registerOutParameter(4, Types.DATE);
             cs.executeQuery();
             dayOfReturn = cs.getDate(4);
+            returnBike = getBikeByID(bikeID);
+            returnBike.setDayOfReturn(dayOfReturn.toLocalDate());
             conn.commit();
-            returnSring = "Lånet har genomförts. Återlämningsdatum: " + dayOfReturn.toString();
+            return returnBike;
+
         } catch (Exception e) {
             try {
                 conn.rollback();
@@ -238,14 +241,13 @@ public class AccessBike {
                 e1.printStackTrace();
             }
             e.printStackTrace();
-            returnSring = "Lånet kunde inte genomföras";
         }
         try {
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return returnSring;
+        return returnBike;
     }
 
     public static Map<String, Integer> getSearchValue(String text) {
