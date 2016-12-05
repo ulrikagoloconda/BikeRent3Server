@@ -36,4 +36,5 @@ public interface DBAccess {
     ArrayList<Bike>getCurrentBikesByUserID(int userID);
     boolean startSession(String auth, int userID);
     String readSessionToken(int userID);
+    void closeSession(int userID);
 }

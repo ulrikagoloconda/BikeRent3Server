@@ -5,11 +5,14 @@ package Model;
  */
 public class MainViewInformaiton {
     private BikeUser currentUser;
-    private String authToken;
     private int totalBikes;
     private int rentedBikes;
+    private String searchValue;
+    private int singleBikeID;
 
-    public MainViewInformaiton(){
+
+
+    public MainViewInformaiton() {
 
     }
 
@@ -37,12 +40,19 @@ public class MainViewInformaiton {
         this.rentedBikes = rentedBikes;
     }
 
-    public String getAuthToken() {
-        return authToken;
+    public String getSearchValue() {
+        return searchValue;
+    }
+    public void setSearchValue(String searchValue) {
+        this.searchValue = searchValue;
     }
 
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
+    public int getSingleBikeID() {
+        return singleBikeID;
+    }
+
+    public void setSingleBikeID(int singleBikeID) {
+        this.singleBikeID = singleBikeID;
     }
 }
 

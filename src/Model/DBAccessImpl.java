@@ -127,4 +127,9 @@ public class DBAccessImpl implements DeleteUser, InsertNewUser, DBAccess {
     public String readSessionToken(int userID) {
         return AccessUser.readSessionToken(userID);
     }
+
+    @Override
+    public void closeSession(int userID) {
+        AccessUser.closeSession(userID);
+    }
 }
