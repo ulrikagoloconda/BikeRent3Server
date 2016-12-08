@@ -59,13 +59,13 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public String loginBikeUser(String json) {
-        System.out.println("I postmetoden " + json);
         Gson gson = new Gson();
         BikeUser user;
         user = gson.fromJson(json, BikeUser.class);
         user.setUserID(0);
         try {
             currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
+            System.out.println(currentUser.getUserID() + " i restroot user id");
             if (currentUser.getUserID() > 0) {
                 ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
                 ArrayList<Bike> bikes = new ArrayList<>();
@@ -74,7 +74,9 @@ public class RestRoot {
                     bikes.add(temp);
                 }
                 currentUser.setCurrentBikeLoans(bikes);
+
                 currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
+                System.out.println("totalt antal lånade cyklar " + currentUser.getTotalBikeLoans());
             }
 
         } catch (Exception e) {
@@ -103,13 +105,10 @@ public class RestRoot {
     @Consumes(MediaType.TEXT_PLAIN)
     public String getAvailableBikes(String json) {
         try {
-            System.out.println("körs detta i availableBikes");
             Gson gson = new Gson();
             BikeUser user = gson.fromJson(json, BikeUser.class);
             String clientToken = dbAccess.readSessionToken(user.getUserID());
-            System.out.println(user.getSessionToken() + " sessionTOken " + clientToken);
             if (user.getSessionToken().equals(clientToken)) {
-                System.out.println(" I ifsatesn, det stämde");
                 ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
                 Bikes bikeCollection = new Bikes();
                 bikeCollection.setBikes(availableBikes);
@@ -130,13 +129,10 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public String getSearchResults(String json) {
-        System.out.println("körs detta i searchResults ");
         Gson gson = new Gson();
         MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
         String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
-        System.out.println(mvi.getCurrentUser().getSessionToken() + " sessionTOken " + clientToken);
         if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
-            System.out.println(" I ifsatesn, det stämde " + mvi.getSearchValue());
             Map<String, Integer> searchMap = dbAccess.getSearchValue(mvi.getSearchValue());
             Bikes bikes = new Bikes();
             bikes.setSearchResults(searchMap);
@@ -155,13 +151,10 @@ public class RestRoot {
     @Consumes(MediaType.TEXT_PLAIN)
     public String closeSession(String json) {
         try {
-            System.out.println("körs detta i closeSession");
             Gson gson = new Gson();
             BikeUser user = gson.fromJson(json, BikeUser.class);
             String clientToken = dbAccess.readSessionToken(user.getUserID());
-            System.out.println(user.getSessionToken() + " sessionTOken " + clientToken);
             if (user.getSessionToken().equals(clientToken)) {
-                System.out.println(" I ifsatesn, det stämde");
                 dbAccess.closeSession(user.getUserID());
                 user.setSessionToken("-1");
                 Gson gson1 = new Gson();
@@ -182,13 +175,10 @@ public class RestRoot {
     @Consumes(MediaType.TEXT_PLAIN)
     public String getSingleBike(String json) {
         try {
-            System.out.println("körs detta i getSingleBIke ");
             Gson gson = new Gson();
             MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
             String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
-            System.out.println(mvi.getCurrentUser().getSessionToken() + " sessionTOken " + clientToken);
             if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
-                System.out.println(" I ifsatesn, det stämde " + mvi.getSingleBikeID());
                 Bike returnBike = dbAccess.getBikeByID(mvi.getSingleBikeID());
                 Gson gson1 = new Gson();
                 String returnJson = gson1.toJson(returnBike);return returnJson;
@@ -208,11 +198,9 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public String executeBikeRent(String json) {
-        System.out.println("körs detta i executeRental ");
         Gson gson = new Gson();
         MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
         String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
-        System.out.println(mvi.getCurrentUser().getSessionToken() + " sessionTOken " + clientToken);
         if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
            Bike returnBike =  dbAccess.executeBikeLoan(mvi.getBikeToRentID(),mvi.getCurrentUser().getUserID());
             Gson gson1 = new Gson();

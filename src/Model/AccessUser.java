@@ -1,5 +1,7 @@
 package Model;
 
+import helpers.AuthHelper;
+
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,11 +42,12 @@ public class AccessUser {
             Connection conn = DBUtil.getConnection(dataBase);
             String sql = "CALL check_password_get_bikeuser(?,?,?)";
             CallableStatement cs = conn.prepareCall(sql);
-            cs.setString(1, userName);
+            cs.setString(1, userName);å
             cs.setString(2, tryPassW);
             cs.registerOutParameter(3, Types.INTEGER);
             ResultSet rs = cs.executeQuery();
             userID = cs.getInt(3);
+            System.out.println(userID + " userid i accessUser rad 50 " + userName + " " + tryPassW);
             if (userID > 0) {
                 if (rs.next()) {
                     returnUser.setUserID(rs.getInt("userID"));
@@ -148,7 +151,7 @@ public class AccessUser {
 
 
     public static boolean insertNewUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) {
-        String SQLInsertUser = "SELECT insert_new_user(?, ?, ?, ?, ?, ?, ?)";
+        String SQLInsertUser = "SELECT insert_new_user(?, ?, ?, ?, ?, ?, ?,?)";
         ResultSet rs = null;
         DBType dataBase = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
@@ -160,14 +163,17 @@ public class AccessUser {
               Connection conn = DBUtil.getConnection(dataBase); //database_user type like ENUM and get PW :-);
               PreparedStatement stmt = conn.prepareStatement(SQLInsertUser, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         ) {
-
+            //in_fname varchar(50),in_lname varchar(11),in_memberlevel varchar(11),in_email varchar(50),
+            // in_phone varchar(11),in_username varchar(11), salt_in VARCHAR(20),in_passw varchar(50)) RETURNS smallint(6
+            String salt = AuthHelper.generateValidationToken();
             stmt.setString(1, fname);
             stmt.setString(2, lname);
             stmt.setInt(3, memberlevel);
             stmt.setString(4, email);
             stmt.setInt(5, phone);
             stmt.setString(6, username);
-            stmt.setString(7, passw);
+            stmt.setString(7,salt);
+            stmt.setString(8, passw);
             rs = stmt.executeQuery();
             int nrFound = 0;
             while (rs.next()) {
@@ -231,8 +237,10 @@ public class AccessUser {
     }
 
     public static boolean startSession(String auth, int userID) {
+        System.out.println(userID + " i start session userid ");
         boolean returnBool = false;
         DBType dataBase = null;
+        Connection conn = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
             dataBase = DBType.Niklas;
         } else {
@@ -240,16 +248,24 @@ public class AccessUser {
         }
         try {
             String sql = "INSERT INTO active_session (session_token, userID, opened) VALUES (?,?,now())";
-            Connection conn = DBUtil.getConnection(dataBase);
+            conn = DBUtil.getConnection(dataBase);
+            conn.setAutoCommit(false);
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, auth);
             stmt.setInt(2, userID);
             LocalDate ld = LocalDate.now();
             Date d = Date.valueOf(ld);
             returnBool = stmt.execute();
-
+            conn.commit();
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+
+
         }
         return returnBool;
     }
@@ -287,7 +303,7 @@ public class AccessUser {
             dataBase = DBType.Ulrika;
         }
         try {
-            String sql = "UPDATE active_session SET closed=now() WHERE userID=?";
+            String sql = "UPDATE active_session SET closed=now() WHERE userID=? AND closed IS NULL";
             Connection conn = DBUtil.getConnection(dataBase);
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userID);
