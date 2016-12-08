@@ -262,5 +262,8 @@
     <orderEntry type="library" name="mysql-connector-java-5.1.39-bin (2)" level="project" />
     <orderEntry type="library" name="jersey-client-2.24.1" level="project" />
     <orderEntry type="library" name="jersey-multipart-1.19.1" level="project" />
+    <orderEntry type="library" name="aopalliance-repackaged-2.5.0-b05 (5)" level="project" />
+    <orderEntry type="library" name="gson-2.6.2 (3)" level="project" />
+    <orderEntry type="library" name="mail (2)" level="project" />
   </component>
 </module>

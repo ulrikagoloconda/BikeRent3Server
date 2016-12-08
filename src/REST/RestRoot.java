@@ -1,30 +1,17 @@
 
 package REST;
 
-import java.io.File;
-import java.io.StringReader;
-import java.sql.SQLException;
+import Interfaces.DBAccess;
+import Model.*;
+import com.google.gson.Gson;
+import helpers.AuthHelper;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import Model.*;
-import com.google.gson.Gson;
-
-import Interfaces.DBAccess;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
-import com.sun.jersey.multipart.MultiPart;
-import helpers.AuthHelper;
-import jdk.nashorn.internal.parser.JSONParser;
+//import com.sun.jersey.multipart.MultiPart;
 
 @Path("/resources")
 public class RestRoot {
