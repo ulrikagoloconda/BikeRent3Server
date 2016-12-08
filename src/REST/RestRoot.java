@@ -75,6 +75,8 @@ public class RestRoot {
                 currentUser.setCurrentBikeLoans(bikes);
 
                 currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
+                System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
+                "get c. bikeloans: " + currentUser.getCurrentBikeLoans());
             }
 
         } catch (Exception e) {
