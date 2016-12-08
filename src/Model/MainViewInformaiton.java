@@ -12,7 +12,7 @@ public class MainViewInformaiton {
     private int bikeToRentID;
     private BikeUser oldUser;
     private BikeUser alteredUser;
-    
+
 
     public MainViewInformaiton() {
 
