@@ -1,6 +1,10 @@
 Vad händer på servern när fler användare använder programmet?
 Och hur påverkar användadet av sessions av att fler kör programmet samtidigt?
 
+Vi behöver en sida i guit som visas när servern ligger nere
+När vi loggar ut, alltså stänger en session, ska loginsidan visas igen. Ska man kunna göra det från alla sidor?
+
+
 Endpoints:
 login (returnerar userObjekt med currentLoan inbäddat + statistikgrundande intar)
 newUser (startar inte session! returnerar booelan)

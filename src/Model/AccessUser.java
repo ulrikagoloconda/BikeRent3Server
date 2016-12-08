@@ -42,12 +42,11 @@ public class AccessUser {
             Connection conn = DBUtil.getConnection(dataBase);
             String sql = "CALL check_password_get_bikeuser(?,?,?)";
             CallableStatement cs = conn.prepareCall(sql);
-            cs.setString(1, userName);å
+            cs.setString(1, userName);
             cs.setString(2, tryPassW);
             cs.registerOutParameter(3, Types.INTEGER);
             ResultSet rs = cs.executeQuery();
             userID = cs.getInt(3);
-            System.out.println(userID + " userid i accessUser rad 50 " + userName + " " + tryPassW);
             if (userID > 0) {
                 if (rs.next()) {
                     returnUser.setUserID(rs.getInt("userID"));
