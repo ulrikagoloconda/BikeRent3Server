@@ -28,10 +28,14 @@ public interface DBAccess {
     boolean InsertNewUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) throws SQLException;
     ArrayList<Bike> getAllBikes();
     boolean UpdateUser(String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password)throws SQLException;
-    String executeBikeLoan(int bikeID, int userID);
+    Bike executeBikeLoan(int bikeID, int userID);
     Map<String,Integer> getSearchValue(String text);
     Bike getBikeByID(int bikeID);
     ArrayList<Integer> getUsersCurrentBikes(int userID);
     ArrayList<Integer> getUsersTotalLoan(int userID);
     ArrayList<Bike>getCurrentBikesByUserID(int userID);
+    boolean startSession(String auth, int userID);
+    String readSessionToken(int userID);
+    void closeSession(int userID);
+    boolean isSessionOpen(int userID);
 }

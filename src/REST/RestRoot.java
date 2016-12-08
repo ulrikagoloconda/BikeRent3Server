@@ -1,25 +1,17 @@
 
 package REST;
 
-import java.io.File;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import Interfaces.DBAccess;
 import Model.*;
 import com.google.gson.Gson;
+import helpers.AuthHelper;
 
-import Interfaces.DBAccess;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.sun.jersey.multipart.MultiPart;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.Map;
+
+//import com.sun.jersey.multipart.MultiPart;
 
 @Path("/resources")
 public class RestRoot {
@@ -31,8 +23,6 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)//(MediaType.TEXT_PLAIN)
     public String getTest() {
         System.out.println("I getmetoden ");
-        //String indataString = convertStreamToString(incomingData);
-        //System.out.println(indataString);
         Gson gson = new Gson();
         ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
 
@@ -40,15 +30,6 @@ public class RestRoot {
         Bike b = availableBikes.get(0);
 
         System.out.println("test the bike objeckt: " + b.getBrandName());
-
-        /*try {
-            System.out.println("Körs detta i try");
-            String json = gson.toJson(b);
-            System.out.println("utskrift av json" + json);
-        }catch (Exception e){
-            System.out.println("Eller körs chatch? ");
-            e.printStackTrace();
-        }*/
         BikeUser user = new BikeUser();
         user.setUserName("cykeltur");
         user.setPassw("12345");
@@ -64,74 +45,156 @@ public class RestRoot {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
-    public String loginBikeUser(String json,@Context HttpServletRequest req) {
-        System.out.println("I postmetoden " + json);
-        HttpSession session= req.getSession(true);
+    public String loginBikeUser(String json) {
         Gson gson = new Gson();
         BikeUser user;
         user = gson.fromJson(json, BikeUser.class);
         user.setUserID(0);
         try {
             currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
-            if(currentUser.getUserID()>0) {
-                session.setAttribute("currentUser", currentUser);
-                System.out.println("Currnetuser passw " + currentUser.getPassw());
+          System.out.println("I restroot login " + currentUser.getUserID());
+            if (currentUser.getUserID() > 0) {
+
                 ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
                 ArrayList<Bike> bikes = new ArrayList<>();
-                for(Integer i : currentBikesID){
+                for (Integer i : currentBikesID) {
                     Bike temp = dbAccess.getBikeByID(i);
                     bikes.add(temp);
                 }
                 currentUser.setCurrentBikeLoans(bikes);
-              currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
+                currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String jsonUser = gson.toJson(currentUser);
+        MainViewInformaiton mvi = new MainViewInformaiton();
+        mvi.setCurrentUser(currentUser);
+        //TODO hårdkodad lösning av statisti, ändra detta
+        mvi.setTotalBikes(100);
+        mvi.setRentedBikes(20);
+       if(dbAccess.isSessionOpen(currentUser.getUserID())){
+           mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
+       } else {
+           String s = AuthHelper.generateValidationToken();
+           dbAccess.startSession(s, currentUser.getUserID());
+           mvi.getCurrentUser().setSessionToken(s);
+       }
+        String jsonUser = gson.toJson(mvi);
         System.out.println(jsonUser);
         return jsonUser;
     }
-    @GET
+
+    @POST
     @Path("/availableBikes")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getAvailableBikes(){
-        System.out.println("körs detta i availableBikes");
-        Gson gson = new Gson();
-       ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
-        Bikes bikeCollection = new Bikes();
-        bikeCollection.setBikes(availableBikes);
-        String json = "tillgängliga cyklar ";
-        json = gson.toJson(bikeCollection);
-        System.out.println(json);
-        return json;
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String getAvailableBikes(String json) {
+        try {
+            Gson gson = new Gson();
+            BikeUser user = gson.fromJson(json, BikeUser.class);
+            String clientToken = dbAccess.readSessionToken(user.getUserID());
+            if (user.getSessionToken().equals(clientToken)) {
+                ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+                Bikes bikeCollection = new Bikes();
+                bikeCollection.setBikes(availableBikes);
+                String returnJson = gson.toJson(bikeCollection);
+                System.out.println(returnJson);
+                return returnJson;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    @Path("downloadfile")
-    @Produces("multipart/mixed")
-    @GET
-    public Response getFile() {
-        System.out.println("gi getfile ");
-
-        MultiPart objMultiPart = new MultiPart();
-        try {
-            ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
-            Bike currentBIke = dbAccess.getBikeByID(currentBikesID.get(0));
-
-            File outputfile = new File("image.jpg");
-            //ImageIO.write(currentBIke.getBufferedImage(), "jpg", outputfile);
-
-            objMultiPart.type(new MediaType("multipart", "mixed"));
-            objMultiPart
-                    .bodyPart(outputfile.getName(), new MediaType("text", "plain"));
-            objMultiPart.bodyPart("" + outputfile.length(), new MediaType("text",
-                    "plain"));
-            objMultiPart.bodyPart(outputfile, new MediaType("multipart", "mixed"));
-        }catch (Exception e){
-            e.printStackTrace();
+    @POST
+    @Path("/search")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String getSearchResults(String json) {
+        Gson gson = new Gson();
+        MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+        String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+        if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+            Map<String, Integer> searchMap = dbAccess.getSearchValue(mvi.getSearchValue());
+            Bikes bikes = new Bikes();
+            bikes.setSearchResults(searchMap);
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(bikes);
+            System.out.println(returnJson);
+            return returnJson;
+        } else {
+            return null;
         }
-        return Response.ok(objMultiPart).build();
+    }
+
+    @POST
+    @Path("/closeSession")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String closeSession(String json) {
+        try {
+            Gson gson = new Gson();
+            BikeUser user = gson.fromJson(json, BikeUser.class);
+            String clientToken = dbAccess.readSessionToken(user.getUserID());
+            if (user.getSessionToken().equals(clientToken)) {
+                dbAccess.closeSession(user.getUserID());
+                user.setSessionToken("-1");
+                Gson gson1 = new Gson();
+               String returnUser = gson1.toJson(user);
+                return returnUser;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @POST
+    @Path("/getBike")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String getSingleBike(String json) {
+        try {
+            Gson gson = new Gson();
+            MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+            String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+            if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+                Bike returnBike = dbAccess.getBikeByID(mvi.getSingleBikeID());
+                Gson gson1 = new Gson();
+                String returnJson = gson1.toJson(returnBike);return returnJson;
+
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    @POST
+    @Path("/executeRental")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String executeBikeRent(String json) {
+        Gson gson = new Gson();
+        MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+        String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+        if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+           Bike returnBike =  dbAccess.executeBikeLoan(mvi.getBikeToRentID(),mvi.getCurrentUser().getUserID());
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(returnBike);
+            return returnJson;
+        } else {
+            return null;
+        }
+
     }
 }
-

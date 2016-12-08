@@ -89,7 +89,7 @@ public class DBAccessImpl implements DeleteUser, InsertNewUser, DBAccess {
   }
 
   @Override
-  public String executeBikeLoan(int bikeID, int userID) {
+  public Bike executeBikeLoan(int bikeID, int userID) {
     return AccessBike.executeBikeLoan(bikeID, userID);
   }
 
@@ -116,5 +116,25 @@ public class DBAccessImpl implements DeleteUser, InsertNewUser, DBAccess {
     @Override
     public ArrayList<Bike> getCurrentBikesByUserID(int userID) {
         return AccessBike.getCurrentBikesByUserID(userID);
+    }
+
+    @Override
+    public boolean startSession(String auth, int userID) {
+        return AccessUser.startSession(auth, userID);
+    }
+
+    @Override
+    public String readSessionToken(int userID) {
+        return AccessUser.readSessionToken(userID);
+    }
+
+    @Override
+    public void closeSession(int userID) {
+        AccessUser.closeSession(userID);
+    }
+
+    @Override
+    public boolean isSessionOpen(int userID) {
+        return AccessUser.isSessionOpen(userID);
     }
 }

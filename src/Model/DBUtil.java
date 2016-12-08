@@ -32,7 +32,8 @@ private static Map<String,String> credMap;
 static {
     credMap = new HashMap<>();
   try {
-    FileReader fr = new FileReader("C:/Users/Goloconda/GitHub/BikeRent3Server/img/dbCreds.txt");
+    //FileReader fr = new FileReader("C:/Users/Goloconda/GitHub/BikeRent3Server/img/dbCreds.txt");
+    FileReader fr = new FileReader("Q:/JavaEE_Server_Client/BikeRent3Server/img/dbCreds.txt");
     BufferedReader br = new BufferedReader(fr);
     String temp;
     while ((temp = br.readLine()) != null){
@@ -66,7 +67,12 @@ static {
 
       case Niklas:
         System.out.println("Niklas inloggning");
-        return DriverManager.getConnection(CONN_STRING_Niklas, USERNAME_Niklas, PASSWORD_Niklas);
+        try {
+        Class.forName("com.mysql.jdbc.Driver");
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+      }
+        return DriverManager.getConnection(credMap.get("CONN_STRING_Niklas"), credMap.get("USERNAME_Niklas"), credMap.get("PASSWORD_Niklas"));
       default:
         System.out.println("No database user...");
         return null;
