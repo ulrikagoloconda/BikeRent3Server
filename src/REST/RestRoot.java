@@ -41,7 +41,6 @@ public class RestRoot {
 
     }
 
-
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
