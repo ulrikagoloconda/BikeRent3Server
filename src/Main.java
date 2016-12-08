@@ -1,12 +1,7 @@
 import Interfaces.DBAccess;
-import Model.*;
-import com.google.gson.Gson;
-
+import Model.DBAccessImpl;
 import REST.RestRoot;
-import com.google.gson.GsonBuilder;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
+import com.google.gson.JsonObject;
 
 //Denna klass ska bara anv�ndas f�r att testk�ra metoder
 public class Main {
@@ -14,15 +9,27 @@ public class Main {
 
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
-		ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+    RestRoot rr = new RestRoot();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("userName", "ost1");
+    jsonObject.addProperty("passw", "ost1");
+    String valuePair = jsonObject.toString();
+    rr.loginBikeUser(valuePair);
+   // String fname, String lname, int memberlevel, String email, int phone, String username, String passw) {
+  // boolean b = AccessUser.insertNewUser("ost1", "ost1",10,"ost@ost.com", 1010343433, "ost1","ost1");
+    //System.out.println(b);
+  /*	ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
 		System.out.println(" avilable " + availableBikes);
 		RestRoot rr = new RestRoot();
 		Gson gson = new Gson();
 		System.out.println("K�rs detta ");
 		BikeUser user = new BikeUser();
-		user.setUserName("GoloGolo");
-		user.setPassw("GoloGolo");
-		Bike bike = new Bike();
+//		user.setUserName("GoloGolo");
+//		user.setPassw("GoloGolo");
+    user.setUserName("cykeltur");
+    user.setPassw("12345");
+
+    Bike bike = new Bike();
 		bike.setAvailable(true);
 		bike.setBikeID(1);
 		bike.setBrandName("MockMonark");
@@ -44,5 +51,6 @@ public class Main {
         }
 		//System.out.println(rr.loginBikeUser(json));
 		//rr.getTest();
+		*/
 	}
 }

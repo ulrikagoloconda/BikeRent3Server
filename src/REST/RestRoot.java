@@ -52,7 +52,9 @@ public class RestRoot {
         user.setUserID(0);
         try {
             currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
+          System.out.println("I restroot login " + currentUser.getUserID());
             if (currentUser.getUserID() > 0) {
+
                 ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
                 ArrayList<Bike> bikes = new ArrayList<>();
                 for (Integer i : currentBikesID) {
@@ -60,7 +62,6 @@ public class RestRoot {
                     bikes.add(temp);
                 }
                 currentUser.setCurrentBikeLoans(bikes);
-
                 currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
             }
 

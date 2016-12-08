@@ -67,6 +67,11 @@ static {
 
       case Niklas:
         System.out.println("Niklas inloggning");
+        try {
+        Class.forName("com.mysql.jdbc.Driver");
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+      }
         return DriverManager.getConnection(credMap.get("CONN_STRING_Niklas"), credMap.get("USERNAME_Niklas"), credMap.get("PASSWORD_Niklas"));
       default:
         System.out.println("No database user...");

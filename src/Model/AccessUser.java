@@ -4,7 +4,6 @@ import helpers.AuthHelper;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * @author Niklas Karlsson
@@ -37,7 +36,6 @@ public class AccessUser {
         } else {
             dataBase = DBType.Ulrika;
         }
-
         try {
             Connection conn = DBUtil.getConnection(dataBase);
             String sql = "CALL check_password_get_bikeuser(?,?,?)";
@@ -47,9 +45,11 @@ public class AccessUser {
             cs.registerOutParameter(3, Types.INTEGER);
             ResultSet rs = cs.executeQuery();
             userID = cs.getInt(3);
+          System.out.println(userID + " userid i loginUser AccessUser");
             if (userID > 0) {
                 if (rs.next()) {
-                    returnUser.setUserID(rs.getInt("userID"));
+                  System.out.println(rs.getInt("userID"));
+                  returnUser.setUserID(rs.getInt("userID"));
                     returnUser.setfName(rs.getString("fname"));
                     returnUser.setlName(rs.getString("lname"));
                     returnUser.setUserName(rs.getString("username"));
@@ -150,7 +150,7 @@ public class AccessUser {
 
 
     public static boolean insertNewUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) {
-        String SQLInsertUser = "SELECT insert_new_user(?, ?, ?, ?, ?, ?, ?,?)";
+        String SQLInsertUser = "SELECT insert_new_user(?, ?, ?, ?, ?, ?, ?, ?)";
         ResultSet rs = null;
         DBType dataBase = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
@@ -175,7 +175,9 @@ public class AccessUser {
             stmt.setString(8, passw);
             rs = stmt.executeQuery();
             int nrFound = 0;
+          System.out.println("Det har blivit nåt i AccessUser insertNewUser");
             while (rs.next()) {
+              System.out.println("Det har blivit nåt i AccessUser insertNewUser");
                 boolean isAddOK = rs.getBoolean(1);
                 return isAddOK;
             }
