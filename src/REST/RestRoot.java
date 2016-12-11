@@ -41,50 +41,104 @@ public class RestRoot {
 
     }
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String loginBikeUser(String json) {
-        Gson gson = new Gson();
-        BikeUser user;
-        user = gson.fromJson(json, BikeUser.class);
-        user.setUserID(0);
-        try {
-            currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
-          System.out.println("I restroot login " + currentUser.getUserID());
-            if (currentUser.getUserID() > 0) {
+  @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String loginBikeUser(String json) {
+    Gson gson = new Gson();
+    BikeUser user;
+    user = gson.fromJson(json, BikeUser.class);
+    user.setUserID(0);
+    try {
+      currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
+      System.out.println("I restroot login " + currentUser.getUserID());
+      if (currentUser.getUserID() > 0) {
 
-                ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
-                ArrayList<Bike> bikes = new ArrayList<>();
-                for (Integer i : currentBikesID) {
-                    Bike temp = dbAccess.getBikeByID(i);
-                    bikes.add(temp);
-                }
-                currentUser.setCurrentBikeLoans(bikes);
-                currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
-                System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
-                "get c. bikeloans: " + currentUser.getCurrentBikeLoans());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
+        ArrayList<Bike> bikes = new ArrayList<>();
+        for (Integer i : currentBikesID) {
+          Bike temp = dbAccess.getBikeByID(i);
+          bikes.add(temp);
         }
-        MainViewInformaiton mvi = new MainViewInformaiton();
-        mvi.setCurrentUser(currentUser);
-        //TODO hårdkodad lösning av statisti, ändra detta
-        mvi.setTotalBikes(100);
-        mvi.setRentedBikes(20);
-       if(dbAccess.isSessionOpen(currentUser.getUserID())){
-           mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
-       } else {
-           String s = AuthHelper.generateValidationToken();
-           dbAccess.startSession(s, currentUser.getUserID());
-           mvi.getCurrentUser().setSessionToken(s);
-       }
-        String jsonUser = gson.toJson(mvi);
-        System.out.println(jsonUser);
-        return jsonUser;
+        currentUser.setCurrentBikeLoans(bikes);
+        currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
+        System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
+            "get c. bikeloans: " + currentUser.getCurrentBikeLoans());
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+    MainViewInformaiton mvi = new MainViewInformaiton();
+    mvi.setCurrentUser(currentUser);
+    //TODO hårdkodad lösning av statisti, ändra detta
+    mvi.setTotalBikes(100);
+    mvi.setRentedBikes(20);
+    if(dbAccess.isSessionOpen(currentUser.getUserID())){
+      mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
+    } else {
+      String s = AuthHelper.generateValidationToken();
+      dbAccess.startSession(s, currentUser.getUserID());
+      mvi.getCurrentUser().setSessionToken(s);
+    }
+    String jsonUser = gson.toJson(mvi);
+    System.out.println(jsonUser);
+    return jsonUser;
+  }
+
+  @POST
+  @Path("/newUser")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String newBikeUser(String json) {
+    Gson gson = new Gson();
+    BikeUser newUser;
+    newUser = gson.fromJson(json, BikeUser.class);
+    boolean isNewUserOK =false;
+    try {
+      isNewUserOK = dbAccess.InsertNewUser(
+          //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
+          //isUpdateUserOK = dbAccess.UpdateUser(currentUser.getfName(), currentUser.getlName(), in_memberlevel, currentUser.getEmail(), currentUser.getPhone(), currentUser.getUserName(), "1234");
+          newUser.getfName(), newUser.getUserName(), newUser.getMemberLevel(), newUser.getEmail(), newUser.getPhone(), newUser.getUserName(), newUser.getPassw());
+      System.out.println("update ?: " + isNewUserOK);
+
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    String jsonUser = gson.toJson(isNewUserOK);
+    System.out.println(jsonUser);
+    return jsonUser;
+  }
+
+  @POST
+  @Path("/alterUser")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String updateBikeUser(String json) {
+    Gson gson = new Gson();
+    MainViewInformaiton mvi;
+    mvi = gson.fromJson(json, MainViewInformaiton.class);
+    boolean isUpdateUserOK =false;
+    try {
+      isUpdateUserOK = dbAccess.UpdateUser(
+          //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
+          //isUpdateUserOK = dbAccess.UpdateUser(currentUser.getfName(), currentUser.getlName(), in_memberlevel, currentUser.getEmail(), currentUser.getPhone(), currentUser.getUserName(), "1234");
+          mvi.getOldUser().getfName(), mvi.getOldUser().getUserName(), mvi.getOldUser().getMemberLevel(), mvi.getOldUser().getEmail(), mvi.getOldUser().getPhone(), mvi.getOldUser().getUserName(), mvi.getOldUser().getPassw());
+      System.out.println("update ?: " + isUpdateUserOK);
+
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    String jsonUser = gson.toJson(isUpdateUserOK);
+    System.out.println(jsonUser);
+    return jsonUser;
+  }
+
+
 
     @POST
     @Path("/availableBikes")
