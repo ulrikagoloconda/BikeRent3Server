@@ -199,4 +199,24 @@ public class RestRoot {
         }
 
     }
+
+
+    @POST
+    @Path("/newBike")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String addBikeToDB(String json) {
+        Gson gson = new Gson();
+        MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+        String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+        if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+            Bike returnBike =  dbAccess.insertNewBike(mvi.getNewBike());
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(returnBike);
+            return returnJson;
+        } else {
+            return null;
+        }
+
+    }
 }

@@ -15,7 +15,7 @@ import java.util.Map;
  * @since 2016-09-16
  */
 public interface DBAccess {
-    int insertNewBike(Bike newBike);
+    Bike insertNewBike(Bike newBike);
     ArrayList<Bike> selectAvailableBikes();
     ArrayList<BikeUser> searchUserByWildcard(String search);
     ArrayList<Bike> selectBikeByTypeBrandColor(String brand, String color, BikeType type);

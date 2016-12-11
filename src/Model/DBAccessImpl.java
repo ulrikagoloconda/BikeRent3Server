@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class DBAccessImpl implements DeleteUser, InsertNewUser, DBAccess {
     @Override
-    public int insertNewBike(Bike newBike) {
+    public Bike insertNewBike(Bike newBike) {
         return AccessBike.insertNewBike(newBike);
     }
 
