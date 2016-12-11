@@ -46,6 +46,7 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public String loginBikeUser(String json) {
+        System.out.println("login körs");
         Gson gson = new Gson();
         BikeUser user;
         user = gson.fromJson(json, BikeUser.class);
