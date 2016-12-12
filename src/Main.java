@@ -10,8 +10,9 @@ public class Main {
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
     RestRoot rr = new RestRoot();
+
     JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("userName", "ost1");
+    jsonObject.addProperty("userID", 15);
     jsonObject.addProperty("passw", "ost1");
     String valuePair = jsonObject.toString();
     rr.loginBikeUser(valuePair);

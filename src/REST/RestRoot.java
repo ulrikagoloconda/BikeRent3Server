@@ -190,14 +190,36 @@ public class RestRoot {
         MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
         String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
         if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
-           Bike returnBike =  dbAccess.executeBikeLoan(mvi.getBikeToRentID(),mvi.getCurrentUser().getUserID());
+            Bike returnBike = dbAccess.executeBikeLoan(mvi.getBikeToRentID(), mvi.getCurrentUser().getUserID());
             Gson gson1 = new Gson();
             String returnJson = gson1.toJson(returnBike);
             return returnJson;
         } else {
             return null;
         }
+    }
 
+        @GET
+        @Path("/removeBike/{userID}/{sessionToken}/{bikeID}")
+        @Produces(MediaType.TEXT_PLAIN)
+       public String removeBike(@PathParam("userID") String userID, @PathParam("sessionToken") String token, @PathParam("bikeID") String bikeID) {
+           String returnString = "";
+            try {
+               int userIDInt = Integer.parseInt(userID);
+               int bikeIDInt = Integer.parseInt(bikeID);
+               String clientToken = dbAccess.readSessionToken(userIDInt);
+               if (token.equals(clientToken)) {
+                    dbAccess.deleteBike(bikeIDInt);
+                  if(dbAccess.deleteBike(bikeIDInt)){
+                      returnString = "Cykel med cykelID " + bikeID + " har raderats från databasen";
+                  }
+               } else {
+                   return returnString;
+               }
+           }catch (Exception e){
+               e.printStackTrace();
+           }
+          return returnString;
     }
 
 
@@ -215,6 +237,31 @@ public class RestRoot {
             String returnJson = gson1.toJson(returnBike);
             return returnJson;
         } else {
+            return null;
+        }
+
+    }
+
+    @POST
+    @Path("/getAllBikes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String getAllBikes(String json) {
+        Gson gson = new Gson();
+        BikeUser user = gson.fromJson(json, BikeUser.class);
+        String clientToken = dbAccess.readSessionToken(user.getUserID());
+        System.out.println(clientToken);
+        System.out.println(user.getMemberLevel());
+        if (user.getSessionToken().equals(clientToken) && user.getMemberLevel()==10) {
+            Bikes bikes = new Bikes();
+            bikes.setBikes(dbAccess.getAllBikes());
+            System.out.println(bikes.getBikes());
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(bikes);
+            System.out.println(returnJson);
+            return returnJson;
+        } else {
+            System.out.println("Är det null här, varför det? ");
             return null;
         }
 
