@@ -132,7 +132,6 @@ public class RestRoot {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
     String jsonUser = gson.toJson(isUpdateUserOK);
     System.out.println(jsonUser);
     return jsonUser;
