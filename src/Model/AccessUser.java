@@ -197,7 +197,7 @@ public class AccessUser {
 
 
     public static boolean UpdateUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) {
-        String SQLInsertUser = "SELECT update_user(?, ?, ?, ?, ?, ?, ?)";
+        String SQLInsertUser = "CALL update_user(?, ?, ?, ?, ?, ?, ?)";
         ResultSet rs = null;
         DBType dataBase = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
@@ -219,7 +219,11 @@ public class AccessUser {
             rs = stmt.executeQuery();
             int nrFound = 0;
             while (rs.next()) {
-                boolean isAddOK = rs.getBoolean(1);
+                boolean isAddOK = false;
+                int confirm = rs.getInt("confirm");
+                if(confirm>0){
+                    isAddOK = true;
+                }
                 return isAddOK;
             }
 
