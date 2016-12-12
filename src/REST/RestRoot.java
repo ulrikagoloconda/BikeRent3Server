@@ -223,7 +223,6 @@ public class RestRoot {
                 Bike returnBike = dbAccess.getBikeByID(mvi.getSingleBikeID());
                 Gson gson1 = new Gson();
                 String returnJson = gson1.toJson(returnBike);return returnJson;
-
             } else {
                 return null;
             }
@@ -252,4 +251,24 @@ public class RestRoot {
         }
 
     }
+
+  @POST
+  @Path("/returnBike")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String returnBike(String json) {
+    try {
+      Gson gson = new Gson();
+      BikeUser user = gson.fromJson(json, BikeUser.class);
+      Bike returnBike = gson.fromJson(json, Bike.class);
+      int returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
+      Gson gson1 = new Gson();
+      String returnJson = gson1.toJson(returnOk);
+      return returnJson;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
 }
