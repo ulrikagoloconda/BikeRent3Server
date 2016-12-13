@@ -258,12 +258,11 @@ public class RestRoot {
   public String returnBike(String json) {
     try {
       Gson gson = new Gson();
-      BikeUser user = gson.fromJson(json, BikeUser.class);
-      Bike returnBike = gson.fromJson(json, Bike.class);
-      String clientToken = dbAccess.readSessionToken(user.getUserID());
+      MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+      String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
 
-      if (user.getSessionToken().equals(clientToken)) {
-        boolean returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
+      if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+        boolean returnOk = AccessBike.returnBike(mvi.getBikeToReturnID(), mvi.getCurrentUser().getUserID());
         Gson gson1 = new Gson();
         String returnJson = gson1.toJson(returnOk);
         return returnJson;
