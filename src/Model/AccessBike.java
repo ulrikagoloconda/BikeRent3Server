@@ -44,7 +44,7 @@ public class AccessBike {
         return 0;
     }
 
-    public static int insertNewBike(Bike newBike) {
+    public static Bike insertNewBike(Bike newBike) {
 
         DBType dataBase = null;
         Connection conn = null;
@@ -62,13 +62,12 @@ public class AccessBike {
             cs.setInt(3, newBike.getModelYear());
             cs.setString(4, newBike.getColor());
             cs.setInt(5, newBike.getSize());
-           //ByteArrayInputStream bais = newBike.getImageStream();
-            //cs.setBinaryStream(6, bais);
-
-            cs.executeQuery();
-            //cs.execute();
-
-
+           ByteArrayInputStream bais = newBike.getImageStream();
+            cs.setBinaryStream(6, bais);
+           ResultSet rs = cs.executeQuery();
+            if (rs.next()){
+              newBike.setBikeID(rs.getInt("bikeID"));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -77,7 +76,7 @@ public class AccessBike {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return newBike.getBikeID();
+        return newBike;
 
 
     }

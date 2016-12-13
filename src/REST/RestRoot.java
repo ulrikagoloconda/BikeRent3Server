@@ -41,52 +41,102 @@ public class RestRoot {
 
     }
 
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String loginBikeUser(String json) {
-        System.out.println("login körs");
-        Gson gson = new Gson();
-        BikeUser user;
-        user = gson.fromJson(json, BikeUser.class);
-        user.setUserID(0);
-        try {
-            currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
-          System.out.println("I restroot login " + currentUser.getUserID());
-            if (currentUser.getUserID() > 0) {
-
-                ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
-                ArrayList<Bike> bikes = new ArrayList<>();
-                for (Integer i : currentBikesID) {
-                    Bike temp = dbAccess.getBikeByID(i);
-                    bikes.add(temp);
-                }
-                currentUser.setCurrentBikeLoans(bikes);
-                currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
-                System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
-                "get c. bikeloans: " + currentUser.getCurrentBikeLoans());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+  @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String loginBikeUser(String json) {
+    Gson gson = new Gson();
+    BikeUser user;
+    user = gson.fromJson(json, BikeUser.class);
+    user.setUserID(0);
+    try {
+      currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
+      System.out.println("I restroot login " + currentUser.getUserID());
+      if (currentUser.getUserID() > 0) {
+        ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
+        ArrayList<Bike> bikes = new ArrayList<>();
+        for (Integer i : currentBikesID) {
+          Bike temp = dbAccess.getBikeByID(i);
+          bikes.add(temp);
         }
-        MainViewInformaiton mvi = new MainViewInformaiton();
-        mvi.setCurrentUser(currentUser);
-        //TODO hårdkodad lösning av statisti, ändra detta
-        mvi.setTotalBikes(100);
-        mvi.setRentedBikes(20);
-       if(dbAccess.isSessionOpen(currentUser.getUserID())){
-           mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
-       } else {
-           String s = AuthHelper.generateValidationToken();
-           dbAccess.startSession(s, currentUser.getUserID());
-           mvi.getCurrentUser().setSessionToken(s);
-       }
-        String jsonUser = gson.toJson(mvi);
-        System.out.println(jsonUser);
-        return jsonUser;
+        currentUser.setCurrentBikeLoans(bikes);
+        currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
+        System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
+            "get c. bikeloans: " + currentUser.getCurrentBikeLoans());
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+    MainViewInformaiton mvi = new MainViewInformaiton();
+    mvi.setCurrentUser(currentUser);
+    //TODO hårdkodad lösning av statisti, ändra detta
+    mvi.setTotalBikes(100);
+    mvi.setRentedBikes(20);
+    if(dbAccess.isSessionOpen(currentUser.getUserID())){
+      mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
+    } else {
+      String s = AuthHelper.generateValidationToken();
+      dbAccess.startSession(s, currentUser.getUserID());
+      mvi.getCurrentUser().setSessionToken(s);
+    }
+    String jsonUser = gson.toJson(mvi);
+    System.out.println(jsonUser);
+    return jsonUser;
+  }
+
+  @POST
+  @Path("/newUser")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String newBikeUser(String json) {
+    Gson gson = new Gson();
+    BikeUser newUser;
+    newUser = gson.fromJson(json, BikeUser.class);
+    boolean isNewUserOK =false;
+    try {
+      isNewUserOK = dbAccess.InsertNewUser(
+          //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
+          //isUpdateUserOK = dbAccess.UpdateUser(currentUser.getfName(), currentUser.getlName(), in_memberlevel, currentUser.getEmail(), currentUser.getPhone(), currentUser.getUserName(), "1234");
+          newUser.getfName(), newUser.getUserName(), newUser.getMemberLevel(), newUser.getEmail(), newUser.getPhone(), newUser.getUserName(), newUser.getPassw());
+      System.out.println("update ?: " + isNewUserOK);
+
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    String jsonUser = gson.toJson(isNewUserOK);
+    System.out.println(jsonUser);
+    return jsonUser;
+  }
+
+  @POST
+  @Path("/alterUser")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String updateBikeUser(String json) {
+    Gson gson = new Gson();
+    MainViewInformaiton mvi;
+    mvi = gson.fromJson(json, MainViewInformaiton.class);
+    boolean isUpdateUserOK =false;
+    try {
+      isUpdateUserOK = dbAccess.UpdateUser(
+          //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
+          //isUpdateUserOK = dbAccess.UpdateUser(currentUser.getfName(), currentUser.getlName(), in_memberlevel, currentUser.getEmail(), currentUser.getPhone(), currentUser.getUserName(), "1234");
+          mvi.getOldUser().getfName(), mvi.getOldUser().getUserName(), mvi.getOldUser().getMemberLevel(), mvi.getOldUser().getEmail(), mvi.getOldUser().getPhone(), mvi.getOldUser().getUserName(), mvi.getOldUser().getPassw());
+      System.out.println("update ?: " + isUpdateUserOK);
+
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    String jsonUser = gson.toJson(isUpdateUserOK);
+    System.out.println(jsonUser);
+    return jsonUser;
+  }
+
+
 
     @POST
     @Path("/availableBikes")
@@ -171,7 +221,6 @@ public class RestRoot {
                 Bike returnBike = dbAccess.getBikeByID(mvi.getSingleBikeID());
                 Gson gson1 = new Gson();
                 String returnJson = gson1.toJson(returnBike);return returnJson;
-
             } else {
                 return null;
             }
@@ -191,7 +240,49 @@ public class RestRoot {
         MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
         String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
         if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
-           Bike returnBike =  dbAccess.executeBikeLoan(mvi.getBikeToRentID(),mvi.getCurrentUser().getUserID());
+            Bike returnBike = dbAccess.executeBikeLoan(mvi.getBikeToRentID(), mvi.getCurrentUser().getUserID());
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(returnBike);
+            return returnJson;
+        } else {
+            return null;
+        }
+    }
+
+        @GET
+        @Path("/removeBike/{userID}/{sessionToken}/{bikeID}")
+        @Produces(MediaType.TEXT_PLAIN)
+       public String removeBike(@PathParam("userID") String userID, @PathParam("sessionToken") String token, @PathParam("bikeID") String bikeID) {
+           String returnString = "";
+            try {
+               int userIDInt = Integer.parseInt(userID);
+               int bikeIDInt = Integer.parseInt(bikeID);
+               String clientToken = dbAccess.readSessionToken(userIDInt);
+               if (token.equals(clientToken)) {
+                    dbAccess.deleteBike(bikeIDInt);
+                  if(dbAccess.deleteBike(bikeIDInt)){
+                      returnString = "Cykel med cykelID " + bikeID + " har raderats från databasen";
+                  }
+               } else {
+                   return returnString;
+               }
+           }catch (Exception e){
+               e.printStackTrace();
+           }
+          return returnString;
+    }
+
+
+    @POST
+    @Path("/newBike")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String addBikeToDB(String json) {
+        Gson gson = new Gson();
+        MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+        String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+        if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+            Bike returnBike =  dbAccess.insertNewBike(mvi.getNewBike());
             Gson gson1 = new Gson();
             String returnJson = gson1.toJson(returnBike);
             return returnJson;
@@ -200,4 +291,48 @@ public class RestRoot {
         }
 
     }
+
+    @POST
+    @Path("/getAllBikes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String getAllBikes(String json) {
+        Gson gson = new Gson();
+        BikeUser user = gson.fromJson(json, BikeUser.class);
+        String clientToken = dbAccess.readSessionToken(user.getUserID());
+        System.out.println(clientToken);
+        System.out.println(user.getMemberLevel());
+        if (user.getSessionToken().equals(clientToken) && user.getMemberLevel()==10) {
+            Bikes bikes = new Bikes();
+            bikes.setBikes(dbAccess.getAllBikes());
+            System.out.println(bikes.getBikes());
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(bikes);
+            System.out.println(returnJson);
+            return returnJson;
+        } else {
+            return null;
+        }
+
+    }
+
+  @POST
+  @Path("/returnBike")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String returnBike(String json) {
+    try {
+      Gson gson = new Gson();
+      BikeUser user = gson.fromJson(json, BikeUser.class);
+      Bike returnBike = gson.fromJson(json, Bike.class);
+      int returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
+      Gson gson1 = new Gson();
+      String returnJson = gson1.toJson(returnOk);
+      return returnJson;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
 }
