@@ -137,4 +137,14 @@ public class DBAccessImpl implements DeleteUser, InsertNewUser, DBAccess {
     public boolean isSessionOpen(int userID) {
         return AccessUser.isSessionOpen(userID);
     }
+
+    @Override
+    public int getTotalNumOfbikes() {
+        return AccessBike.getTotalNumOfBikes();
+    }
+
+    @Override
+    public int getNumOfCurrentAvailableBikes() {
+        return AccessBike.getNumOfCurrentAvailableBikes();
+    }
 }

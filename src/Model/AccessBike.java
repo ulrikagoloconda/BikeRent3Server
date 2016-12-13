@@ -38,11 +38,15 @@ public class AccessBike {
             cs.setInt(1, bikeID);
             cs.setInt(2, userID);
             ResultSet rs = cs.executeQuery();
+            if (rs.next()) {
+                int returnInt = rs.getInt("confirm");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
     }
+
 
     public static Bike insertNewBike(Bike newBike) {
 
@@ -365,10 +369,8 @@ public class AccessBike {
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
                 ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-               // BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
                 System.out.println(bis + " null eller inte? ");
                tempBike.setImageStream(bis);
-                // tempBike.setBufferedImage(theImage);
                 tempBike.setSize(rs.getInt("size"));
                 tempBike.setType(rs.getString("typeName"));
                 tempBike.setBrandName(rs.getString("brandname"));
@@ -380,5 +382,52 @@ public class AccessBike {
             e.printStackTrace();
         }
         return bikeList;
+    }
+
+    public static int getTotalNumOfBikes() {
+        DBType dataBase = null;
+        Connection conn = null;
+        int returnInt = 0;
+        if (helpers.PCRelated.isThisNiklasPC()) {
+            dataBase = DBType.Niklas;
+        } else {
+            dataBase = DBType.Ulrika;
+        }
+        try {
+            conn = DBUtil.getConnection(dataBase);
+            String sql = "CALL get_num_of_total_bikes()";
+            PreparedStatement ps = conn.prepareCall(sql);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                returnInt = rs.getInt("totalBikes");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return returnInt;
+    }
+
+    public static int getNumOfCurrentAvailableBikes() {
+        DBType dataBase = null;
+        Connection conn = null;
+        int returnInt = 0;
+        if (helpers.PCRelated.isThisNiklasPC()) {
+            dataBase = DBType.Niklas;
+        } else {
+            dataBase = DBType.Ulrika;
+        }
+        try {
+            conn = DBUtil.getConnection(dataBase);
+            String sql = "CALL get_num_of_curr_available_bikes()";
+            PreparedStatement ps = conn.prepareCall(sql);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                returnInt = rs.getInt("availableBikes");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return returnInt;
+
     }
 }

@@ -38,4 +38,6 @@ public interface DBAccess {
     String readSessionToken(int userID);
     void closeSession(int userID);
     boolean isSessionOpen(int userID);
+    int getTotalNumOfbikes();
+    int getNumOfCurrentAvailableBikes();
 }

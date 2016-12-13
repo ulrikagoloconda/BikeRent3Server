@@ -11,8 +11,11 @@ import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Map;
 
-//import com.sun.jersey.multipart.MultiPart;
-
+//Klassen är en samling av endpoints som försörjer en klient med data. Programmet skapar, vid inloggning, en
+//session med tillhörande session_token som sparas i databasen. Varje gång som kilenten efterfågar information efter
+//inloggningen, måste användarens id och ett aktuellt session_token medfölja förfrågningen. Detta val har fått
+//konsekvensen att alla metoder utom en är en POST, eftersom vi inte vill skicka id och aktuellt session_token i url.
+//För att visa att vi kan göra även GET har ändå en metod genomförts med en GET-metod.
 @Path("/resources")
 public class RestRoot {
     private JDBCConnection jdbcConnection;
@@ -41,6 +44,8 @@ public class RestRoot {
 
     }
 
+    //Metoden loggar in användaren i programmet och sakapar en randomiserad sträng, ett session_token, som sedan returneras och
+    //sparas på klienten.
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.TEXT_PLAIN)
@@ -71,9 +76,10 @@ public class RestRoot {
     }
     MainViewInformaiton mvi = new MainViewInformaiton();
     mvi.setCurrentUser(currentUser);
-    //TODO hårdkodad lösning av statisti, ändra detta
-    mvi.setTotalBikes(100);
-    mvi.setRentedBikes(20);
+      int total = dbAccess.getTotalNumOfbikes();
+      int available = dbAccess.getNumOfCurrentAvailableBikes();
+    mvi.setTotalBikes(total);
+    mvi.setAvailableBikes(available);
     if(dbAccess.isSessionOpen(currentUser.getUserID())){
       mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
     } else {
@@ -82,10 +88,11 @@ public class RestRoot {
       mvi.getCurrentUser().setSessionToken(s);
     }
     String jsonUser = gson.toJson(mvi);
-    System.out.println(jsonUser);
     return jsonUser;
   }
 
+
+  //Metoden skapar en ny användare. Efter registrerandet kan användaren logga in, först då skapas en ny session.
   @POST
   @Path("/newUser")
   @Produces(MediaType.APPLICATION_JSON)
@@ -112,6 +119,7 @@ public class RestRoot {
     return jsonUser;
   }
 
+  //Metoden uppdaterar en användare i databasen.
   @POST
   @Path("/alterUser")
   @Produces(MediaType.APPLICATION_JSON)
@@ -138,7 +146,7 @@ public class RestRoot {
   }
 
 
-
+//Metoden returnerar en lista på alla cyklar som för tillfället är lediga
     @POST
     @Path("/availableBikes")
     @Produces(MediaType.APPLICATION_JSON)
@@ -153,7 +161,6 @@ public class RestRoot {
                 Bikes bikeCollection = new Bikes();
                 bikeCollection.setBikes(availableBikes);
                 String returnJson = gson.toJson(bikeCollection);
-                System.out.println(returnJson);
                 return returnJson;
             } else {
                 return null;
@@ -164,6 +171,8 @@ public class RestRoot {
         }
     }
 
+
+    //Metoden tar emot en sträng som sedan används för att göra en wild card sökning i databasen
     @POST
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
@@ -178,13 +187,13 @@ public class RestRoot {
             bikes.setSearchResults(searchMap);
             Gson gson1 = new Gson();
             String returnJson = gson1.toJson(bikes);
-            System.out.println(returnJson);
             return returnJson;
         } else {
             return null;
         }
     }
 
+    //Metoden stänger en session genom att sätta en sluttid för det aktuella användares session i databasen
     @POST
     @Path("/closeSession")
     @Produces(MediaType.APPLICATION_JSON)
@@ -209,6 +218,8 @@ public class RestRoot {
         }
     }
 
+
+    //Metoden returnerar en specifik cykel.
     @POST
     @Path("/getBike")
     @Produces(MediaType.APPLICATION_JSON)
@@ -232,6 +243,7 @@ public class RestRoot {
     }
 
 
+//Metoden utför ett lån genom att registrera lånet i databasen
     @POST
     @Path("/executeRental")
     @Produces(MediaType.APPLICATION_JSON)
@@ -250,6 +262,7 @@ public class RestRoot {
         }
     }
 
+    //Klassens enda GET-metod tar bort en cykel från databasen
         @GET
         @Path("/removeBike/{userID}/{sessionToken}/{bikeID}")
         @Produces(MediaType.TEXT_PLAIN)
@@ -274,6 +287,7 @@ public class RestRoot {
     }
 
 
+    //Metoden lägger till en ny cykel i databasen
     @POST
     @Path("/newBike")
     @Produces(MediaType.APPLICATION_JSON)
@@ -292,7 +306,8 @@ public class RestRoot {
         }
 
     }
-
+//Metoden returnerar alla cyklar som finns i databasen, för att få tillgång till denna måste användarens id vara satt
+// till 10, dvs: Metoden är bara för administratörer
     @POST
     @Path("/getAllBikes")
     @Produces(MediaType.APPLICATION_JSON)
@@ -301,23 +316,20 @@ public class RestRoot {
         Gson gson = new Gson();
         BikeUser user = gson.fromJson(json, BikeUser.class);
         String clientToken = dbAccess.readSessionToken(user.getUserID());
-        System.out.println(clientToken);
         System.out.println(user.getMemberLevel());
         if (user.getSessionToken().equals(clientToken) && user.getMemberLevel()==10) {
             Bikes bikes = new Bikes();
             bikes.setBikes(dbAccess.getAllBikes());
-            System.out.println(bikes.getBikes());
             Gson gson1 = new Gson();
             String returnJson = gson1.toJson(bikes);
-            System.out.println(returnJson);
             return returnJson;
         } else {
-            System.out.println("Är det null här, varför det? ");
             return null;
         }
 
     }
 
+    //Metoden lämnar tillbaka en cykel efter lån, dvs lånet registreras som avslutat i databasen
   @POST
   @Path("/returnBike")
   @Produces(MediaType.APPLICATION_JSON)
@@ -336,5 +348,4 @@ public class RestRoot {
       return null;
     }
   }
-
 }

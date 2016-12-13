@@ -7,12 +7,7 @@ När vi loggar ut, alltså stänger en session, ska loginsidan visas igen. Ska m
 
 Gör länken till databasdokumentet i ordning
 
-Endpoints:
-login (returnerar userObjekt med currentLoan inbäddat + statistikgrundande intar)
-newUser (startar inte session! returnerar booelan)
-updateUser (returnerar boolean)
-errorEndpiont (Skickar html för sparande i databas, och returnerar en boolean)
-getAvaiableBies (Returnerar lista på objetBike)
-getBikesFromSearch (Returnerar list på bikeObject)
-addBikeToDB( returnerar bikeObject med id)
-removeBikeFromDB(returnerar boolean)
+hur sätts currentUser i de olika klasserna.
+getUserFromUserName
+Golo kommenterar restRoot
+Samma kommentarer på MainViewInformation både klient och server
