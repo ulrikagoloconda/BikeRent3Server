@@ -1,16 +1,9 @@
 package Model;
 
-import com.mysql.jdbc.*;
 import helpers.PCRelated;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.sql.*;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +15,7 @@ import java.util.Map;
  * @since 2016-09-16
  */
 public class AccessBike {
-    public static int returnBike(int bikeID, int userID) {
+    public static boolean returnBike(int bikeID, int userID) {
         System.out.println("bike " + bikeID + " user " + userID);
         DBType dataBase = null;
         Connection conn = null;
@@ -37,14 +30,19 @@ public class AccessBike {
             CallableStatement cs = conn.prepareCall(sql);
             cs.setInt(1, bikeID);
             cs.setInt(2, userID);
-            ResultSet rs = cs.executeQuery();
-        } catch (Exception e) {
-            e.printStackTrace();
+          ResultSet rs = cs.executeQuery();
+          if(rs.next()){
+              boolean returnOK = rs.getBoolean("confirm");
+            return returnOK;
+            }
+          }
+        catch (SQLException e) {
+          e.printStackTrace();
         }
-        return 0;
-    }
+        return false;
+        }
 
-    public static int insertNewBike(Bike newBike) {
+  public static int insertNewBike(Bike newBike) {
 
         DBType dataBase = null;
         Connection conn = null;

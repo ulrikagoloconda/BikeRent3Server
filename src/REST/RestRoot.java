@@ -260,7 +260,7 @@ public class RestRoot {
       Gson gson = new Gson();
       BikeUser user = gson.fromJson(json, BikeUser.class);
       Bike returnBike = gson.fromJson(json, Bike.class);
-      int returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
+      boolean returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
       Gson gson1 = new Gson();
       String returnJson = gson1.toJson(returnOk);
       return returnJson;
