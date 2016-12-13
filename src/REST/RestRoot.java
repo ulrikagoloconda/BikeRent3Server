@@ -15,31 +15,31 @@ import java.util.Map;
 
 @Path("/resources")
 public class RestRoot {
-    private JDBCConnection jdbcConnection;
-    private DBAccess dbAccess = new DBAccessImpl();
-    private BikeUser currentUser;
+  private JDBCConnection jdbcConnection;
+  private DBAccess dbAccess = new DBAccessImpl();
+  private BikeUser currentUser;
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)//(MediaType.TEXT_PLAIN)
-    public String getTest() {
-        System.out.println("I getmetoden ");
-        Gson gson = new Gson();
-        ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)//(MediaType.TEXT_PLAIN)
+  public String getTest() {
+    System.out.println("I getmetoden ");
+    Gson gson = new Gson();
+    ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
 
-        System.out.println(availableBikes);
-        Bike b = availableBikes.get(0);
+    System.out.println(availableBikes);
+    Bike b = availableBikes.get(0);
 
-        System.out.println("test the bike objeckt: " + b.getBrandName());
-        BikeUser user = new BikeUser();
-        user.setUserName("cykeltur");
-        user.setPassw("12345");
-        String json = gson.toJson(user);
-        //System.out.println(loginBikeUser(json));
-        System.out.println("");
-        String s = "HHejsan från restRoot ";
-        return json;//s;
+    System.out.println("test the bike objeckt: " + b.getBrandName());
+    BikeUser user = new BikeUser();
+    user.setUserName("cykeltur");
+    user.setPassw("12345");
+    String json = gson.toJson(user);
+    //System.out.println(loginBikeUser(json));
+    System.out.println("");
+    String s = "HHejsan från restRoot ";
+    return json;//s;
 
-    }
+  }
 
   @POST
   @Produces(MediaType.APPLICATION_JSON)
@@ -74,7 +74,7 @@ public class RestRoot {
     //TODO hårdkodad lösning av statisti, ändra detta
     mvi.setTotalBikes(100);
     mvi.setRentedBikes(20);
-    if(dbAccess.isSessionOpen(currentUser.getUserID())){
+    if (dbAccess.isSessionOpen(currentUser.getUserID())) {
       mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
     } else {
       String s = AuthHelper.generateValidationToken();
@@ -94,7 +94,7 @@ public class RestRoot {
     Gson gson = new Gson();
     BikeUser newUser;
     newUser = gson.fromJson(json, BikeUser.class);
-    boolean isNewUserOK =false;
+    boolean isNewUserOK = false;
     try {
       isNewUserOK = dbAccess.InsertNewUser(
           //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
@@ -120,7 +120,7 @@ public class RestRoot {
     Gson gson = new Gson();
     MainViewInformaiton mvi;
     mvi = gson.fromJson(json, MainViewInformaiton.class);
-    boolean isUpdateUserOK =false;
+    boolean isUpdateUserOK = false;
     try {
       isUpdateUserOK = dbAccess.UpdateUser(
           //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
@@ -138,118 +138,118 @@ public class RestRoot {
   }
 
 
+  @POST
+  @Path("/availableBikes")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String getAvailableBikes(String json) {
+    try {
+      Gson gson = new Gson();
+      BikeUser user = gson.fromJson(json, BikeUser.class);
+      String clientToken = dbAccess.readSessionToken(user.getUserID());
+      if (user.getSessionToken().equals(clientToken)) {
+        ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+        Bikes bikeCollection = new Bikes();
+        bikeCollection.setBikes(availableBikes);
+        String returnJson = gson.toJson(bikeCollection);
+        System.out.println(returnJson);
+        return returnJson;
+      } else {
+        return null;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
 
-    @POST
-    @Path("/availableBikes")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String getAvailableBikes(String json) {
-        try {
-            Gson gson = new Gson();
-            BikeUser user = gson.fromJson(json, BikeUser.class);
-            String clientToken = dbAccess.readSessionToken(user.getUserID());
-            if (user.getSessionToken().equals(clientToken)) {
-                ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
-                Bikes bikeCollection = new Bikes();
-                bikeCollection.setBikes(availableBikes);
-                String returnJson = gson.toJson(bikeCollection);
-                System.out.println(returnJson);
-                return returnJson;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+  @POST
+  @Path("/search")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String getSearchResults(String json) {
+    Gson gson = new Gson();
+    MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+    String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+    if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+      Map<String, Integer> searchMap = dbAccess.getSearchValue(mvi.getSearchValue());
+      Bikes bikes = new Bikes();
+      bikes.setSearchResults(searchMap);
+      Gson gson1 = new Gson();
+      String returnJson = gson1.toJson(bikes);
+      System.out.println(returnJson);
+      return returnJson;
+    } else {
+      return null;
+    }
+  }
+
+  @POST
+  @Path("/closeSession")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String closeSession(String json) {
+    try {
+      Gson gson = new Gson();
+      BikeUser user = gson.fromJson(json, BikeUser.class);
+      String clientToken = dbAccess.readSessionToken(user.getUserID());
+      if (user.getSessionToken().equals(clientToken)) {
+        dbAccess.closeSession(user.getUserID());
+        user.setSessionToken("-1");
+        Gson gson1 = new Gson();
+        String returnUser = gson1.toJson(user);
+        return returnUser;
+      } else {
+        return null;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  @POST
+  @Path("/getBike")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String getSingleBike(String json) {
+    try {
+      Gson gson = new Gson();
+      MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+      String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+      if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+        Bike returnBike = dbAccess.getBikeByID(mvi.getSingleBikeID());
+        Gson gson1 = new Gson();
+        String returnJson = gson1.toJson(returnBike);
+        return returnJson;
+      } else {
+        return null;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+
+  @POST
+  @Path("/executeRental")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.TEXT_PLAIN)
+  public String executeBikeRent(String json) {
+    Gson gson = new Gson();
+    MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+    String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+    if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+      Bike returnBike = dbAccess.executeBikeLoan(mvi.getBikeToRentID(), mvi.getCurrentUser().getUserID());
+      Gson gson1 = new Gson();
+      String returnJson = gson1.toJson(returnBike);
+      return returnJson;
+    } else {
+      return null;
     }
 
-    @POST
-    @Path("/search")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String getSearchResults(String json) {
-        Gson gson = new Gson();
-        MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
-        String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
-        if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
-            Map<String, Integer> searchMap = dbAccess.getSearchValue(mvi.getSearchValue());
-            Bikes bikes = new Bikes();
-            bikes.setSearchResults(searchMap);
-            Gson gson1 = new Gson();
-            String returnJson = gson1.toJson(bikes);
-            System.out.println(returnJson);
-            return returnJson;
-        } else {
-            return null;
-        }
-    }
-
-    @POST
-    @Path("/closeSession")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String closeSession(String json) {
-        try {
-            Gson gson = new Gson();
-            BikeUser user = gson.fromJson(json, BikeUser.class);
-            String clientToken = dbAccess.readSessionToken(user.getUserID());
-            if (user.getSessionToken().equals(clientToken)) {
-                dbAccess.closeSession(user.getUserID());
-                user.setSessionToken("-1");
-                Gson gson1 = new Gson();
-               String returnUser = gson1.toJson(user);
-                return returnUser;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @POST
-    @Path("/getBike")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String getSingleBike(String json) {
-        try {
-            Gson gson = new Gson();
-            MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
-            String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
-            if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
-                Bike returnBike = dbAccess.getBikeByID(mvi.getSingleBikeID());
-                Gson gson1 = new Gson();
-                String returnJson = gson1.toJson(returnBike);return returnJson;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
-    @POST
-    @Path("/executeRental")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
-    public String executeBikeRent(String json) {
-        Gson gson = new Gson();
-        MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
-        String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
-        if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
-           Bike returnBike =  dbAccess.executeBikeLoan(mvi.getBikeToRentID(),mvi.getCurrentUser().getUserID());
-            Gson gson1 = new Gson();
-            String returnJson = gson1.toJson(returnBike);
-            return returnJson;
-        } else {
-            return null;
-        }
-
-    }
+  }
 
   @POST
   @Path("/returnBike")
@@ -260,14 +260,21 @@ public class RestRoot {
       Gson gson = new Gson();
       BikeUser user = gson.fromJson(json, BikeUser.class);
       Bike returnBike = gson.fromJson(json, Bike.class);
-      boolean returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
-      Gson gson1 = new Gson();
-      String returnJson = gson1.toJson(returnOk);
-      return returnJson;
+      String clientToken = dbAccess.readSessionToken(user.getUserID());
+
+      if (user.getSessionToken().equals(clientToken)) {
+        boolean returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
+        Gson gson1 = new Gson();
+        String returnJson = gson1.toJson(returnOk);
+        return returnJson;
+      } else {
+        return null;
+      }
     } catch (Exception e) {
       e.printStackTrace();
       return null;
     }
+
   }
 
 }
