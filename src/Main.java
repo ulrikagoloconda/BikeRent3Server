@@ -11,8 +11,8 @@ public class Main {
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
         //String fname, String lname, int memberlevel, String email, int phone, String username, String passw
-        boolean b = AccessUser.UpdateUser("Golo", "Golo", 10,"traden@golo.com", 200, "Ulrika","Golo" );
-        System.out.println(b + " Main");
+      //  boolean b = AccessUser.UpdateUser("Golo", "Golo", 10,"traden@golo.com", 200, "Ulrika","Golo" );
+       // System.out.println(b + " Main");
    /* RestRoot rr = new RestRoot();
 
     JsonObject jsonObject = new JsonObject();
