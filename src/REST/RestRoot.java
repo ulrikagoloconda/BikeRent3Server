@@ -11,36 +11,18 @@ import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Map;
 
-//import com.sun.jersey.multipart.MultiPart;
-
+//Klassen är en samling av endpoints som försörjer en klient med data. Programmet skapar, vid inloggning, en
+//session med tillhörande session_token som sparas i databasen. Varje gång som kilenten efterfågar information efter
+//inloggningen, måste användarens id och ett aktuellt session_token medfölja förfrågningen. Detta val har fått
+//konsekvensen att alla metoder utom en är en POST, eftersom vi inte vill skicka id och aktuellt session_token i url.
+//För att visa att vi kan göra även GET har ändå en metod genomförts med en GET-metod.
 @Path("/resources")
 public class RestRoot {
-    private JDBCConnection jdbcConnection;
-    private DBAccess dbAccess = new DBAccessImpl();
-    private BikeUser currentUser;
+  private DBAccess dbAccess = new DBAccessImpl();
+  private BikeUser currentUser;
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)//(MediaType.TEXT_PLAIN)
-    public String getTest() {
-        System.out.println("I getmetoden ");
-        Gson gson = new Gson();
-        ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
-
-        System.out.println(availableBikes);
-        Bike b = availableBikes.get(0);
-
-        System.out.println("test the bike objeckt: " + b.getBrandName());
-        BikeUser user = new BikeUser();
-        user.setUserName("cykeltur");
-        user.setPassw("12345");
-        String json = gson.toJson(user);
-        //System.out.println(loginBikeUser(json));
-        System.out.println("");
-        String s = "HHejsan från restRoot ";
-        return json;//s;
-
-    }
-
+    //Metoden loggar in användaren i programmet och sakapar en randomiserad sträng, ett session_token, som sedan returneras och
+    //sparas på klienten.
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.TEXT_PLAIN)
@@ -53,13 +35,8 @@ public class RestRoot {
       currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
       System.out.println("I restroot login " + currentUser.getUserID());
       if (currentUser.getUserID() > 0) {
-        ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
-        ArrayList<Bike> bikes = new ArrayList<>();
-        for (Integer i : currentBikesID) {
-          Bike temp = dbAccess.getBikeByID(i);
-          bikes.add(temp);
-        }
-        currentUser.setCurrentBikeLoans(bikes);
+        ArrayList<Bike> currentBikes = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
+        currentUser.setCurrentBikeLoans(currentBikes);
         currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
         System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
             "get c. bikeloans: " + currentUser.getCurrentBikeLoans());
@@ -70,21 +47,26 @@ public class RestRoot {
     }
     MainViewInformaiton mvi = new MainViewInformaiton();
     mvi.setCurrentUser(currentUser);
-    //TODO hårdkodad lösning av statisti, ändra detta
-    mvi.setTotalBikes(100);
-    mvi.setRentedBikes(20);
+
+      int total = dbAccess.getTotalNumOfbikes();
+      int available = dbAccess.getNumOfCurrentAvailableBikes();
+    mvi.setTotalBikes(total);
+    mvi.setAvailableBikes(available);
+
+      System.out.println(" I login total: " + total + " available " + available);
     if(dbAccess.isSessionOpen(currentUser.getUserID())){
-      mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
+        mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
     } else {
       String s = AuthHelper.generateValidationToken();
       dbAccess.startSession(s, currentUser.getUserID());
       mvi.getCurrentUser().setSessionToken(s);
     }
     String jsonUser = gson.toJson(mvi);
-    System.out.println(jsonUser);
     return jsonUser;
   }
 
+
+  //Metoden skapar en ny användare. Efter registrerandet kan användaren logga in, först då skapas en ny session.
   @POST
   @Path("/newUser")
   @Produces(MediaType.APPLICATION_JSON)
@@ -93,7 +75,7 @@ public class RestRoot {
     Gson gson = new Gson();
     BikeUser newUser;
     newUser = gson.fromJson(json, BikeUser.class);
-    boolean isNewUserOK =false;
+    boolean isNewUserOK = false;
     try {
       isNewUserOK = dbAccess.InsertNewUser(
           //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
@@ -111,6 +93,7 @@ public class RestRoot {
     return jsonUser;
   }
 
+  //Metoden uppdaterar en användare i databasen.
   @POST
   @Path("/alterUser")
   @Produces(MediaType.APPLICATION_JSON)
@@ -119,7 +102,7 @@ public class RestRoot {
     Gson gson = new Gson();
     MainViewInformaiton mvi;
     mvi = gson.fromJson(json, MainViewInformaiton.class);
-    boolean isUpdateUserOK =false;
+    boolean isUpdateUserOK = false;
     try {
       isUpdateUserOK = dbAccess.UpdateUser(
           //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
@@ -137,7 +120,7 @@ public class RestRoot {
   }
 
 
-
+//Metoden returnerar en lista på alla cyklar som för tillfället är lediga
     @POST
     @Path("/availableBikes")
     @Produces(MediaType.APPLICATION_JSON)
@@ -152,7 +135,6 @@ public class RestRoot {
                 Bikes bikeCollection = new Bikes();
                 bikeCollection.setBikes(availableBikes);
                 String returnJson = gson.toJson(bikeCollection);
-                System.out.println(returnJson);
                 return returnJson;
             } else {
                 return null;
@@ -163,6 +145,7 @@ public class RestRoot {
         }
     }
 
+    //Metoden tar emot en sträng som sedan används för att göra en wild card sökning i databasen
     @POST
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
@@ -177,13 +160,13 @@ public class RestRoot {
             bikes.setSearchResults(searchMap);
             Gson gson1 = new Gson();
             String returnJson = gson1.toJson(bikes);
-            System.out.println(returnJson);
             return returnJson;
         } else {
             return null;
         }
     }
 
+    //Metoden stänger en session genom att sätta en sluttid för det aktuella användares session i databasen
     @POST
     @Path("/closeSession")
     @Produces(MediaType.APPLICATION_JSON)
@@ -206,8 +189,10 @@ public class RestRoot {
             e.printStackTrace();
             return null;
         }
-    }
+  }
 
+
+    //Metoden returnerar en specifik cykel.
     @POST
     @Path("/getBike")
     @Produces(MediaType.APPLICATION_JSON)
@@ -220,7 +205,8 @@ public class RestRoot {
             if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
                 Bike returnBike = dbAccess.getBikeByID(mvi.getSingleBikeID());
                 Gson gson1 = new Gson();
-                String returnJson = gson1.toJson(returnBike);return returnJson;
+                String returnJson = gson1.toJson(returnBike);
+                return returnJson;
             } else {
                 return null;
             }
@@ -231,6 +217,8 @@ public class RestRoot {
     }
 
 
+
+//Metoden utför ett lån genom att registrera lånet i databasen
     @POST
     @Path("/executeRental")
     @Produces(MediaType.APPLICATION_JSON)
@@ -249,6 +237,7 @@ public class RestRoot {
         }
     }
 
+    //Klassens enda GET-metod tar bort en cykel från databasen
         @GET
         @Path("/removeBike/{userID}/{sessionToken}/{bikeID}")
         @Produces(MediaType.TEXT_PLAIN)
@@ -273,6 +262,7 @@ public class RestRoot {
     }
 
 
+    //Metoden lägger till en ny cykel i databasen
     @POST
     @Path("/newBike")
     @Produces(MediaType.APPLICATION_JSON)
@@ -289,9 +279,10 @@ public class RestRoot {
         } else {
             return null;
         }
-
     }
 
+//Metoden returnerar alla cyklar som finns i databasen, för att få tillgång till denna måste användarens id vara satt
+// till 10, dvs: Metoden är bara för administratörer
     @POST
     @Path("/getAllBikes")
     @Produces(MediaType.APPLICATION_JSON)
@@ -300,15 +291,12 @@ public class RestRoot {
         Gson gson = new Gson();
         BikeUser user = gson.fromJson(json, BikeUser.class);
         String clientToken = dbAccess.readSessionToken(user.getUserID());
-        System.out.println(clientToken);
         System.out.println(user.getMemberLevel());
         if (user.getSessionToken().equals(clientToken) && user.getMemberLevel()==10) {
             Bikes bikes = new Bikes();
             bikes.setBikes(dbAccess.getAllBikes());
-            System.out.println(bikes.getBikes());
             Gson gson1 = new Gson();
             String returnJson = gson1.toJson(bikes);
-            System.out.println(returnJson);
             return returnJson;
         } else {
             return null;
@@ -316,6 +304,7 @@ public class RestRoot {
 
     }
 
+    //Metoden lämnar tillbaka en cykel efter lån, dvs lånet registreras som avslutat i databasen
   @POST
   @Path("/returnBike")
   @Produces(MediaType.APPLICATION_JSON)
@@ -323,16 +312,44 @@ public class RestRoot {
   public String returnBike(String json) {
     try {
       Gson gson = new Gson();
-      BikeUser user = gson.fromJson(json, BikeUser.class);
-      Bike returnBike = gson.fromJson(json, Bike.class);
-      int returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
-      Gson gson1 = new Gson();
-      String returnJson = gson1.toJson(returnOk);
-      return returnJson;
+      MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+      String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+
+      if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+        boolean returnOk = AccessBike.returnBike(mvi.getBikeToReturnID(), mvi.getCurrentUser().getUserID());
+        Gson gson1 = new Gson();
+        String returnJson = gson1.toJson(returnOk);
+        return returnJson;
+      } else {
+        return null;
+      }
     } catch (Exception e) {
       e.printStackTrace();
       return null;
     }
   }
 
+    @POST
+    @Path("/fetchUpdate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String fetchUpdatedInfo(String json) {
+        Gson gson = new Gson();
+        BikeUser user = gson.fromJson(json,BikeUser.class);
+        String clientToken = dbAccess.readSessionToken(user.getUserID());
+        if (user.getSessionToken().equals(clientToken)) {
+            MainViewInformaiton mvi =  new MainViewInformaiton();
+            user.setCurrentBikeLoans(AccessBike.getCurrentBikesByUserID(user.getUserID()));
+            user.setTotalBikeLoans(AccessRentbridge.getUsersTotalLoan(user.getUserID()));
+            mvi.setTotalBikes(AccessBike.getTotalNumOfBikes());
+            mvi.setAvailableBikes(AccessBike.getNumOfCurrentAvailableBikes());
+            user.setSessionToken(null);
+            mvi.setCurrentUser(user);
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(mvi);
+            return returnJson;
+        } else {
+            return null;
+        }
+    }
 }

@@ -1,16 +1,9 @@
 package Model;
 
-import com.mysql.jdbc.*;
 import helpers.PCRelated;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.sql.*;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +15,7 @@ import java.util.Map;
  * @since 2016-09-16
  */
 public class AccessBike {
-    public static int returnBike(int bikeID, int userID) {
+    public static boolean returnBike(int bikeID, int userID) {
         System.out.println("bike " + bikeID + " user " + userID);
         DBType dataBase = null;
         Connection conn = null;
@@ -37,15 +30,20 @@ public class AccessBike {
             CallableStatement cs = conn.prepareCall(sql);
             cs.setInt(1, bikeID);
             cs.setInt(2, userID);
-            ResultSet rs = cs.executeQuery();
-        } catch (Exception e) {
-            e.printStackTrace();
+          ResultSet rs = cs.executeQuery();
+          if(rs.next()){
+              boolean returnOK = rs.getBoolean("confirm");
+            return returnOK;
+            }
+          }
+        catch (SQLException e) {
+          e.printStackTrace();
         }
-        return 0;
-    }
+        return false;
+        }
+
 
     public static Bike insertNewBike(Bike newBike) {
-
         DBType dataBase = null;
         Connection conn = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
@@ -62,11 +60,11 @@ public class AccessBike {
             cs.setInt(3, newBike.getModelYear());
             cs.setString(4, newBike.getColor());
             cs.setInt(5, newBike.getSize());
-           ByteArrayInputStream bais = newBike.getImageStream();
+            ByteArrayInputStream bais = newBike.getImageStream();
             cs.setBinaryStream(6, bais);
-           ResultSet rs = cs.executeQuery();
-            if (rs.next()){
-              newBike.setBikeID(rs.getInt("bikeID"));
+            ResultSet rs = cs.executeQuery();
+            if (rs.next()) {
+                newBike.setBikeID(rs.getInt("bikeID"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -77,8 +75,6 @@ public class AccessBike {
             e.printStackTrace();
         }
         return newBike;
-
-
     }
 
     public static ArrayList<Bike> selectAvailableBikes() {
@@ -308,8 +304,10 @@ public class AccessBike {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 if (rs.getDate("dayOfActualReturn") == null && rs.getDate("dayOfRent") != null) {
+                    System.out.println("i access bike get singelbiek " + rs.getDate("dayOfActualReturn") + " " + rs.getDate(("dayOfRent")));
                     b.setAvailable(false);
                 } else {
+                    System.out.println("i access bike get singelbiek " + rs.getDate("dayOfActualReturn") + " " + rs.getDate(("dayOfRent")));
                     b.setAvailable(true);
                 }
                 b.setBrandName(rs.getString("brandname"));
@@ -365,10 +363,8 @@ public class AccessBike {
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
                 ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-               // BufferedImage theImage = ImageIO.read(new ByteArrayInputStream(bytes));
                 System.out.println(bis + " null eller inte? ");
                tempBike.setImageStream(bis);
-                // tempBike.setBufferedImage(theImage);
                 tempBike.setSize(rs.getInt("size"));
                 tempBike.setType(rs.getString("typeName"));
                 tempBike.setBrandName(rs.getString("brandname"));
@@ -380,5 +376,55 @@ public class AccessBike {
             e.printStackTrace();
         }
         return bikeList;
+    }
+
+    public static int getTotalNumOfBikes() {
+        DBType dataBase = null;
+        Connection conn = null;
+        int returnInt = 0;
+        if (helpers.PCRelated.isThisNiklasPC()) {
+            dataBase = DBType.Niklas;
+        } else {
+            dataBase = DBType.Ulrika;
+        }
+        try {
+            conn = DBUtil.getConnection(dataBase);
+            String sql = "CALL get_num_of_total_bikes()";
+            PreparedStatement ps = conn.prepareCall(sql);
+            ResultSet rs = ps.executeQuery();
+            System.out.println("I access Bike get TOtla num ");
+            if(rs.next()){
+                returnInt = rs.getInt("totalBikes");
+                System.out.println("I access Bike get TOtla num i next " + returnInt);
+                return returnInt;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return returnInt;
+    }
+
+    public static int getNumOfCurrentAvailableBikes() {
+        DBType dataBase = null;
+        Connection conn = null;
+        int returnInt = 0;
+        if (helpers.PCRelated.isThisNiklasPC()) {
+            dataBase = DBType.Niklas;
+        } else {
+            dataBase = DBType.Ulrika;
+        }
+        try {
+            conn = DBUtil.getConnection(dataBase);
+            String sql = "CALL get_num_of_curr_available_bikes()";
+            PreparedStatement ps = conn.prepareCall(sql);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                returnInt = rs.getInt("availableBikes");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return returnInt;
+
     }
 }

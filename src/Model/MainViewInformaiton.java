@@ -3,16 +3,19 @@ package Model;
 /**
  * Created by Goloconda on 2016-12-02.
  */
+
 public class MainViewInformaiton {
     private BikeUser currentUser;
     private int totalBikes;
-    private int rentedBikes;
+    private int availableBikes;
     private String searchValue;
     private int singleBikeID;
     private int bikeToRentID;
+    private int bikeToReturnID;
     private BikeUser oldUser;
     private BikeUser alteredUser;
     private Bike newBike;
+    private int rentedBikes;
 
 
     public MainViewInformaiton() {
@@ -33,14 +36,6 @@ public class MainViewInformaiton {
 
     public void setTotalBikes(int totalBikes) {
         this.totalBikes = totalBikes;
-    }
-
-    public int getRentedBikes() {
-        return rentedBikes;
-    }
-
-    public void setRentedBikes(int rentedBikes) {
-        this.rentedBikes = rentedBikes;
     }
 
     public String getSearchValue() {
@@ -88,6 +83,30 @@ public class MainViewInformaiton {
 
     public void setNewBike(Bike newBike) {
         this.newBike = newBike;
+    }
+
+    public int getAvailableBikes() {
+        return availableBikes;
+    }
+
+    public void setAvailableBikes(int availableBikes) {
+        this.availableBikes = availableBikes;
+    }
+
+    public int getBikeToReturnID() {
+        return bikeToReturnID;
+    }
+
+    public void setBikeToReturnID(int bikeToReturnID) {
+        this.bikeToReturnID = bikeToReturnID;
+    }
+
+    public int getRentedBikes() {
+        return rentedBikes;
+    }
+
+    public void setRentedBikes(int rentedBikes) {
+        this.rentedBikes = rentedBikes;
     }
 }
 
