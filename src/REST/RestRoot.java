@@ -18,31 +18,8 @@ import java.util.Map;
 //För att visa att vi kan göra även GET har ändå en metod genomförts med en GET-metod.
 @Path("/resources")
 public class RestRoot {
-  private JDBCConnection jdbcConnection;
   private DBAccess dbAccess = new DBAccessImpl();
   private BikeUser currentUser;
-
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)//(MediaType.TEXT_PLAIN)
-  public String getTest() {
-    System.out.println("I getmetoden ");
-    Gson gson = new Gson();
-    ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
-
-    System.out.println(availableBikes);
-    Bike b = availableBikes.get(0);
-
-    System.out.println("test the bike objeckt: " + b.getBrandName());
-    BikeUser user = new BikeUser();
-    user.setUserName("cykeltur");
-    user.setPassw("12345");
-    String json = gson.toJson(user);
-    //System.out.println(loginBikeUser(json));
-    System.out.println("");
-    String s = "HHejsan från restRoot ";
-    return json;//s;
-
-  }
 
     //Metoden loggar in användaren i programmet och sakapar en randomiserad sträng, ett session_token, som sedan returneras och
     //sparas på klienten.
@@ -59,13 +36,8 @@ public class RestRoot {
       System.out.println("I restroot login " + currentUser.getUserID());
       if (currentUser.getUserID() > 0) {
 
-        ArrayList<Integer> currentBikesID = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
-        ArrayList<Bike> bikes = new ArrayList<>();
-        for (Integer i : currentBikesID) {
-          Bike temp = dbAccess.getBikeByID(i);
-          bikes.add(temp);
-        }
-        currentUser.setCurrentBikeLoans(bikes);
+        ArrayList<Bike> currentBikes = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
+        currentUser.setCurrentBikeLoans(currentBikes);
         currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
         System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
             "get c. bikeloans: " + currentUser.getCurrentBikeLoans());
@@ -81,6 +53,8 @@ public class RestRoot {
       int available = dbAccess.getNumOfCurrentAvailableBikes();
     mvi.setTotalBikes(total);
     mvi.setAvailableBikes(available);
+
+      System.out.println(" I login total: " + total + " available " + available);
     if(dbAccess.isSessionOpen(currentUser.getUserID())){
         mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
     } else {
@@ -355,4 +329,28 @@ public class RestRoot {
       return null;
     }
   }
+
+    @POST
+    @Path("/fetchUpdate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String fetchUpdatedInfo(String json) {
+        Gson gson = new Gson();
+        BikeUser user = gson.fromJson(json,BikeUser.class);
+        String clientToken = dbAccess.readSessionToken(user.getUserID());
+        if (user.getSessionToken().equals(clientToken)) {
+            MainViewInformaiton mvi =  new MainViewInformaiton();
+            user.setCurrentBikeLoans(AccessBike.getCurrentBikesByUserID(user.getUserID()));
+            user.setTotalBikeLoans(AccessRentbridge.getUsersTotalLoan(user.getUserID()));
+            mvi.setTotalBikes(AccessBike.getTotalNumOfBikes());
+            mvi.setAvailableBikes(AccessBike.getNumOfCurrentAvailableBikes());
+            user.setSessionToken(null);
+            mvi.setCurrentUser(user);
+            Gson gson1 = new Gson();
+            String returnJson = gson1.toJson(mvi);
+            return returnJson;
+        } else {
+            return null;
+        }
+    }
 }

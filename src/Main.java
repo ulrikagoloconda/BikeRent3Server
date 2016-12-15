@@ -1,4 +1,5 @@
 import Interfaces.DBAccess;
+import Model.AccessBike;
 import Model.AccessUser;
 import Model.DBAccessImpl;
 import REST.RestRoot;
@@ -10,6 +11,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
+		AccessBike.getBikeByID(2);
+		AccessBike.getBikeByID(12);
+		AccessBike.getBikeByID(4);
         //String fname, String lname, int memberlevel, String email, int phone, String username, String passw
       //  boolean b = AccessUser.UpdateUser("Golo", "Golo", 10,"traden@golo.com", 200, "Ulrika","Golo" );
        // System.out.println(b + " Main");

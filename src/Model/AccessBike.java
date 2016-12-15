@@ -304,8 +304,10 @@ public class AccessBike {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 if (rs.getDate("dayOfActualReturn") == null && rs.getDate("dayOfRent") != null) {
+                    System.out.println("i access bike get singelbiek " + rs.getDate("dayOfActualReturn") + " " + rs.getDate(("dayOfRent")));
                     b.setAvailable(false);
                 } else {
+                    System.out.println("i access bike get singelbiek " + rs.getDate("dayOfActualReturn") + " " + rs.getDate(("dayOfRent")));
                     b.setAvailable(true);
                 }
                 b.setBrandName(rs.getString("brandname"));
@@ -390,8 +392,11 @@ public class AccessBike {
             String sql = "CALL get_num_of_total_bikes()";
             PreparedStatement ps = conn.prepareCall(sql);
             ResultSet rs = ps.executeQuery();
+            System.out.println("I access Bike get TOtla num ");
             if(rs.next()){
                 returnInt = rs.getInt("totalBikes");
+                System.out.println("I access Bike get TOtla num i next " + returnInt);
+                return returnInt;
             }
         }catch (Exception e){
             e.printStackTrace();

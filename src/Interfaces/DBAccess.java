@@ -31,7 +31,7 @@ public interface DBAccess {
     Bike executeBikeLoan(int bikeID, int userID);
     Map<String,Integer> getSearchValue(String text);
     Bike getBikeByID(int bikeID);
-    ArrayList<Integer> getUsersCurrentBikes(int userID);
+    ArrayList<Bike> getUsersCurrentBikes(int userID);
     ArrayList<Integer> getUsersTotalLoan(int userID);
     ArrayList<Bike>getCurrentBikesByUserID(int userID);
     boolean startSession(String auth, int userID);
