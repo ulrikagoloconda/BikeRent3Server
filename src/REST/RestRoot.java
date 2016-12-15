@@ -18,31 +18,31 @@ import java.util.Map;
 //För att visa att vi kan göra även GET har ändå en metod genomförts med en GET-metod.
 @Path("/resources")
 public class RestRoot {
-    private JDBCConnection jdbcConnection;
-    private DBAccess dbAccess = new DBAccessImpl();
-    private BikeUser currentUser;
+  private JDBCConnection jdbcConnection;
+  private DBAccess dbAccess = new DBAccessImpl();
+  private BikeUser currentUser;
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)//(MediaType.TEXT_PLAIN)
-    public String getTest() {
-        System.out.println("I getmetoden ");
-        Gson gson = new Gson();
-        ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)//(MediaType.TEXT_PLAIN)
+  public String getTest() {
+    System.out.println("I getmetoden ");
+    Gson gson = new Gson();
+    ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
 
-        System.out.println(availableBikes);
-        Bike b = availableBikes.get(0);
+    System.out.println(availableBikes);
+    Bike b = availableBikes.get(0);
 
-        System.out.println("test the bike objeckt: " + b.getBrandName());
-        BikeUser user = new BikeUser();
-        user.setUserName("cykeltur");
-        user.setPassw("12345");
-        String json = gson.toJson(user);
-        //System.out.println(loginBikeUser(json));
-        System.out.println("");
-        String s = "HHejsan från restRoot ";
-        return json;//s;
+    System.out.println("test the bike objeckt: " + b.getBrandName());
+    BikeUser user = new BikeUser();
+    user.setUserName("cykeltur");
+    user.setPassw("12345");
+    String json = gson.toJson(user);
+    //System.out.println(loginBikeUser(json));
+    System.out.println("");
+    String s = "HHejsan från restRoot ";
+    return json;//s;
 
-    }
+  }
 
     //Metoden loggar in användaren i programmet och sakapar en randomiserad sträng, ett session_token, som sedan returneras och
     //sparas på klienten.
@@ -76,12 +76,13 @@ public class RestRoot {
     }
     MainViewInformaiton mvi = new MainViewInformaiton();
     mvi.setCurrentUser(currentUser);
+
       int total = dbAccess.getTotalNumOfbikes();
       int available = dbAccess.getNumOfCurrentAvailableBikes();
     mvi.setTotalBikes(total);
     mvi.setAvailableBikes(available);
     if(dbAccess.isSessionOpen(currentUser.getUserID())){
-      mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
+        mvi.getCurrentUser().setSessionToken(dbAccess.readSessionToken(currentUser.getUserID()));
     } else {
       String s = AuthHelper.generateValidationToken();
       dbAccess.startSession(s, currentUser.getUserID());
@@ -101,7 +102,7 @@ public class RestRoot {
     Gson gson = new Gson();
     BikeUser newUser;
     newUser = gson.fromJson(json, BikeUser.class);
-    boolean isNewUserOK =false;
+    boolean isNewUserOK = false;
     try {
       isNewUserOK = dbAccess.InsertNewUser(
           //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
@@ -128,7 +129,7 @@ public class RestRoot {
     Gson gson = new Gson();
     MainViewInformaiton mvi;
     mvi = gson.fromJson(json, MainViewInformaiton.class);
-    boolean isUpdateUserOK =false;
+    boolean isUpdateUserOK = false;
     try {
       isUpdateUserOK = dbAccess.UpdateUser(
           //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
@@ -170,7 +171,6 @@ public class RestRoot {
             return null;
         }
     }
-
 
     //Metoden tar emot en sträng som sedan används för att göra en wild card sökning i databasen
     @POST
@@ -216,7 +216,7 @@ public class RestRoot {
             e.printStackTrace();
             return null;
         }
-    }
+  }
 
 
     //Metoden returnerar en specifik cykel.
@@ -232,7 +232,8 @@ public class RestRoot {
             if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
                 Bike returnBike = dbAccess.getBikeByID(mvi.getSingleBikeID());
                 Gson gson1 = new Gson();
-                String returnJson = gson1.toJson(returnBike);return returnJson;
+                String returnJson = gson1.toJson(returnBike);
+                return returnJson;
             } else {
                 return null;
             }
@@ -241,6 +242,7 @@ public class RestRoot {
             return null;
         }
     }
+
 
 
 //Metoden utför ett lån genom att registrera lånet i databasen
@@ -304,8 +306,8 @@ public class RestRoot {
         } else {
             return null;
         }
-
     }
+
 //Metoden returnerar alla cyklar som finns i databasen, för att få tillgång till denna måste användarens id vara satt
 // till 10, dvs: Metoden är bara för administratörer
     @POST
@@ -337,12 +339,17 @@ public class RestRoot {
   public String returnBike(String json) {
     try {
       Gson gson = new Gson();
-      BikeUser user = gson.fromJson(json, BikeUser.class);
-      Bike returnBike = gson.fromJson(json, Bike.class);
-      int returnOk = AccessBike.returnBike(returnBike.getBikeID(), user.getUserID());
-      Gson gson1 = new Gson();
-      String returnJson = gson1.toJson(returnOk);
-      return returnJson;
+      MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
+      String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+
+      if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+        boolean returnOk = AccessBike.returnBike(mvi.getBikeToReturnID(), mvi.getCurrentUser().getUserID());
+        Gson gson1 = new Gson();
+        String returnJson = gson1.toJson(returnOk);
+        return returnJson;
+      } else {
+        return null;
+      }
     } catch (Exception e) {
       e.printStackTrace();
       return null;

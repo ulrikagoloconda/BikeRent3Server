@@ -1,16 +1,9 @@
 package Model;
 
-import com.mysql.jdbc.*;
 import helpers.PCRelated;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.sql.*;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +15,7 @@ import java.util.Map;
  * @since 2016-09-16
  */
 public class AccessBike {
-    public static int returnBike(int bikeID, int userID) {
+    public static boolean returnBike(int bikeID, int userID) {
         System.out.println("bike " + bikeID + " user " + userID);
         DBType dataBase = null;
         Connection conn = null;
@@ -37,19 +30,20 @@ public class AccessBike {
             CallableStatement cs = conn.prepareCall(sql);
             cs.setInt(1, bikeID);
             cs.setInt(2, userID);
-            ResultSet rs = cs.executeQuery();
-            if (rs.next()) {
-                int returnInt = rs.getInt("confirm");
+          ResultSet rs = cs.executeQuery();
+          if(rs.next()){
+              boolean returnOK = rs.getBoolean("confirm");
+            return returnOK;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+          }
+        catch (SQLException e) {
+          e.printStackTrace();
         }
-        return 0;
-    }
+        return false;
+        }
 
 
     public static Bike insertNewBike(Bike newBike) {
-
         DBType dataBase = null;
         Connection conn = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
@@ -66,11 +60,11 @@ public class AccessBike {
             cs.setInt(3, newBike.getModelYear());
             cs.setString(4, newBike.getColor());
             cs.setInt(5, newBike.getSize());
-           ByteArrayInputStream bais = newBike.getImageStream();
+            ByteArrayInputStream bais = newBike.getImageStream();
             cs.setBinaryStream(6, bais);
-           ResultSet rs = cs.executeQuery();
-            if (rs.next()){
-              newBike.setBikeID(rs.getInt("bikeID"));
+            ResultSet rs = cs.executeQuery();
+            if (rs.next()) {
+                newBike.setBikeID(rs.getInt("bikeID"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,8 +75,6 @@ public class AccessBike {
             e.printStackTrace();
         }
         return newBike;
-
-
     }
 
     public static ArrayList<Bike> selectAvailableBikes() {

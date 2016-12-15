@@ -3,6 +3,7 @@ package Model;
 /**
  * Created by Goloconda on 2016-12-02.
  */
+
 public class MainViewInformaiton {
     private BikeUser currentUser;
     private int totalBikes;
@@ -10,9 +11,11 @@ public class MainViewInformaiton {
     private String searchValue;
     private int singleBikeID;
     private int bikeToRentID;
+    private int bikeToReturnID;
     private BikeUser oldUser;
     private BikeUser alteredUser;
     private Bike newBike;
+    private int rentedBikes;
 
 
     public MainViewInformaiton() {
@@ -89,6 +92,21 @@ public class MainViewInformaiton {
     public void setAvailableBikes(int availableBikes) {
         this.availableBikes = availableBikes;
     }
-}
 
+    public int getBikeToReturnID() {
+        return bikeToReturnID;
+    }
+
+    public void setBikeToReturnID(int bikeToReturnID) {
+        this.bikeToReturnID = bikeToReturnID;
+    }
+
+    public int getRentedBikes() {
+        return rentedBikes;
+    }
+
+    public void setRentedBikes(int rentedBikes) {
+        this.rentedBikes = rentedBikes;
+    }
+}
 
