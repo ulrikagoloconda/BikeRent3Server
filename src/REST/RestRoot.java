@@ -103,6 +103,7 @@ public class RestRoot {
     MainViewInformaiton mvi;
     mvi = gson.fromJson(json, MainViewInformaiton.class);
     boolean isUpdateUserOK = false;
+      //TODO här behövs en check för att kontrollera session_token
     try {
       isUpdateUserOK = dbAccess.UpdateUser(
           //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
@@ -242,7 +243,7 @@ public class RestRoot {
         @Path("/removeBike/{userID}/{sessionToken}/{bikeID}")
         @Produces(MediaType.TEXT_PLAIN)
        public String removeBike(@PathParam("userID") String userID, @PathParam("sessionToken") String token, @PathParam("bikeID") String bikeID) {
-           String returnString = "";
+           String returnString = "Du har inte rätt access";
             try {
                int userIDInt = Integer.parseInt(userID);
                int bikeIDInt = Integer.parseInt(bikeID);
@@ -329,6 +330,7 @@ public class RestRoot {
     }
   }
 
+  //Metod hämtar ny information från databasen för att kunna uppdatera gui.
     @POST
     @Path("/fetchUpdate")
     @Produces(MediaType.APPLICATION_JSON)

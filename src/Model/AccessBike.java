@@ -419,7 +419,7 @@ public class AccessBike {
             PreparedStatement ps = conn.prepareCall(sql);
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
-                returnInt = rs.getInt("availableBikes");
+                returnInt = rs.getInt("count");
             }
         }catch (Exception e){
             e.printStackTrace();
