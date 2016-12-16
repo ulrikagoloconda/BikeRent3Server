@@ -104,6 +104,7 @@ public class RestRoot {
     MainViewInformaiton mvi;
     mvi = gson.fromJson(json, MainViewInformaiton.class);
     boolean isUpdateUserOK = false;
+      //TODO här behövs en check för att kontrollera session_token
     try {
       isUpdateUserOK = dbAccess.UpdateUser(
           //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
@@ -330,6 +331,7 @@ public class RestRoot {
     }
   }
 
+  //Metod hämtar ny information från databasen för att kunna uppdatera gui.
     @POST
     @Path("/fetchUpdate")
     @Produces(MediaType.APPLICATION_JSON)

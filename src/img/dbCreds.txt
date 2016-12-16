@@ -1,0 +1,8 @@
+USERNAME_Ulrika=root
+PASSWORD_Ulrika=Lyktstolpe1
+CONN_STRING_Ulrika=jdbc:mysql://localhost:3306/bikerent
+USERNAME_Niklas=dbuser
+PASSWORD_Niklas=1234
+CONN_STRING_Niklas=jdbc:mysql://localhost/bikerent
+
+
