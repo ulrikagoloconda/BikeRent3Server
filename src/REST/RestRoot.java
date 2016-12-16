@@ -244,7 +244,7 @@ public class RestRoot {
         @Path("/removeBike/{userID}/{sessionToken}/{bikeID}")
         @Produces(MediaType.TEXT_PLAIN)
        public String removeBike(@PathParam("userID") String userID, @PathParam("sessionToken") String token, @PathParam("bikeID") String bikeID) {
-           String returnString = "";
+           String returnString = "Du har inte rätt access";
             try {
                int userIDInt = Integer.parseInt(userID);
                int bikeIDInt = Integer.parseInt(bikeID);
