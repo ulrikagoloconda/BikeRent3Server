@@ -39,7 +39,9 @@ BIKERENT3
 	För att köra programmet krävs en databas och en driver. Script till databasen finns under fliken SQL-settings. 
 	Klassen DBUtil läser användarnamn, lösenord och databasnamn från en fil. 
 	För att koppla upp sig mot databasen krävs att korrekta uppgifter införs i dokumentet.
-Vi har använt många bibliotek vid sidan av javaEE. För att hantera RESTanropen på klientsidan har vi använt Apache HTTPClient. Andra bibliotek att nämna är Gson, Jersey, Appache commons.
+    Vi har använt många bibliotek vid sidan av javaEE. För att hantera RESTanropen på klientsidan har vi använt Apache HTTPClient.
+    Andra bibliotek att nämna är Gson, Jersey, Appache commons.
+    En komplett lib-katalog för att köra programmet finns inkluderat i både Server-repot och Client-repot.
 
 	
 	Contributors
