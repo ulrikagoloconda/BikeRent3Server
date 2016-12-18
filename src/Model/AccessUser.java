@@ -45,7 +45,6 @@ public class AccessUser {
             cs.registerOutParameter(3, Types.INTEGER);
             ResultSet rs = cs.executeQuery();
             userID = cs.getInt(3);
-          System.out.println(userID + " userid i loginUser AccessUser");
             if (userID > 0) {
                 if (rs.next()) {
                   System.out.println(rs.getInt("userID"));
@@ -55,6 +54,7 @@ public class AccessUser {
                     returnUser.setUserName(rs.getString("username"));
                     returnUser.setEmail(rs.getString("email"));
                     returnUser.setMemberLevel(rs.getInt("memberlevel"));
+                    returnUser.setPhone(rs.getInt("phone"));
                 }
             }
         } catch (Exception e) {

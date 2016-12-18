@@ -11,6 +11,6 @@ public class Main {
 
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
-		AccessBike.getBikeByID(2);
+		AccessUser.UpdateUser("golo","golo",10,"gologologolo@golo.com",400,"Ulrika", "Golo");
 	}
 }

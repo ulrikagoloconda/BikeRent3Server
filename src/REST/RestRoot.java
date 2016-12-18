@@ -39,7 +39,7 @@ public class RestRoot {
         currentUser.setCurrentBikeLoans(currentBikes);
         currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
         System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
-            "get c. bikeloans: " + currentUser.getCurrentBikeLoans());
+            "get current. bikeloans: " + currentUser.getCurrentBikeLoans() + "phone : " + currentUser.getPhone());
       }
 
     } catch (Exception e) {
@@ -75,6 +75,7 @@ public class RestRoot {
     Gson gson = new Gson();
     BikeUser newUser;
     newUser = gson.fromJson(json, BikeUser.class);
+      System.out.println(newUser.getPhone() + " i new user phone ");
     boolean isNewUserOK = false;
     try {
       isNewUserOK = dbAccess.InsertNewUser(
@@ -99,27 +100,49 @@ public class RestRoot {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.TEXT_PLAIN)
   public String updateBikeUser(String json) {
-    Gson gson = new Gson();
-    MainViewInformaiton mvi;
-    mvi = gson.fromJson(json, MainViewInformaiton.class);
-    boolean isUpdateUserOK = false;
-      //TODO här behövs en check för att kontrollera session_token
-    try {
-      isUpdateUserOK = dbAccess.UpdateUser(
-          //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
-          //isUpdateUserOK = dbAccess.UpdateUser(currentUser.getfName(), currentUser.getlName(), in_memberlevel, currentUser.getEmail(), currentUser.getPhone(), currentUser.getUserName(), "1234");
-          mvi.getOldUser().getfName(), mvi.getOldUser().getUserName(), mvi.getOldUser().getMemberLevel(), mvi.getOldUser().getEmail(), mvi.getOldUser().getPhone(), mvi.getOldUser().getUserName(), mvi.getOldUser().getPassw());
-      System.out.println("update ?: " + isUpdateUserOK);
+      Gson gson = new Gson();
+      MainViewInformaiton mvi;
+      mvi = gson.fromJson(json, MainViewInformaiton.class);
+      boolean isUpdateUserOK = false;
+      BikeUser user = mvi.getOldUser();
+      System.out.println(user.getPhone() + " i alter user phone ");
+
+      String clientToken = dbAccess.readSessionToken(user.getUserID());
+
+      if (mvi.getOldUser().getSessionToken().equals(clientToken)) {
+          try {
+              isUpdateUserOK = dbAccess.UpdateUser(
+                      //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
+                      //isUpdateUserOK = dbAccess.UpdateUser(
+                      // currentUser.getfName(),
+                      // currentUser.getlName(),
+                      // in_memberlevel,
+                      // currentUser.getEmail(),
+                      // currentUser.getPhone(),
+                      // currentUser.getUserName(),
+                      // pw..);
+                      //AccessUser.UpdateUser("golo","golo",10,"gologologolo@golo.com",400,"Ulrika", "Golo");
+                      mvi.getAlteredUser().getfName(),
+                      mvi.getAlteredUser().getlName(),
+                      mvi.getAlteredUser().getMemberLevel(),
+                      mvi.getAlteredUser().getEmail(),
+                      mvi.getAlteredUser().getPhone(),
+                      mvi.getOldUser().getUserName(),
+                      mvi.getAlteredUser().getPassw());
+              System.out.println("passw: "+ mvi.getAlteredUser().getPassw());
+
+              System.out.println("update ?: " + isUpdateUserOK);
 
 
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    String jsonUser = gson.toJson(isUpdateUserOK);
-    System.out.println(jsonUser);
-    return jsonUser;
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+          String jsonUser = gson.toJson(isUpdateUserOK);
+          System.out.println(jsonUser);
+          return jsonUser;
+      }
+      return null;
   }
-
 
 //Metoden returnerar en lista på alla cyklar som för tillfället är lediga
     @POST
