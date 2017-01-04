@@ -24,6 +24,7 @@ public class Bike{
   private String imageFileName;
   private LocalDate dayOfReturn;
   private LocalDate dayOfRent;
+  private Integer state;
 
   private ByteArrayInputStream imageStream;
  /* private BufferedImage bufferedImage;
@@ -143,17 +144,6 @@ public class Bike{
     this.dayOfRent = dayOfRent;
   }
 
-  @Override
-  public String toString() {
-    return "Bike Object: \n**********" + "\n" +
-        getBrandName() + "\n" +
-        //getImagePath() +"\n" +
-        getType() + "\n" +
-        getColor() + "\n" +
-        getModelYear() + "\n" +
-        getSize() + "\n ************";
-  }
-
     public int getCreatedByUserID() {
         return createdByUserID;
     }
@@ -169,5 +159,24 @@ public class Bike{
     public void setImageStream(ByteArrayInputStream imageStream) {
 
         this.imageStream = imageStream;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    @Override
+    public String toString() {
+        return "Bike Object: \n**********" + "\n" +
+                getBrandName() + "\n" +
+                //getImagePath() +"\n" +
+                getType() + "\n" +
+                getColor() + "\n" +
+                getModelYear() + "\n" +
+                getSize() + "\n ************";
     }
 }

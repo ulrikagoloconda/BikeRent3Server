@@ -9,6 +9,7 @@ import helpers.AuthHelper;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Map;
 
 //Klassen är en samling av endpoints som försörjer en klient med data. Programmet skapar, vid inloggning, en
@@ -150,6 +151,8 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public String getAvailableBikes(String json) {
+        long millisStart = Calendar.getInstance().getTimeInMillis();
+
         try {
             Gson gson = new Gson();
             BikeUser user = gson.fromJson(json, BikeUser.class);
@@ -159,11 +162,18 @@ public class RestRoot {
                 Bikes bikeCollection = new Bikes();
                 bikeCollection.setBikes(availableBikes);
                 String returnJson = gson.toJson(bikeCollection);
+                long millisStop = Calendar.getInstance().getTimeInMillis();
+                System.out.println("Tidsåtgång: " + (millisStop - millisStart) + " millisekunder" );
                 return returnJson;
             } else {
+                long millisStop = Calendar.getInstance().getTimeInMillis();
+                System.out.println("Tidsåtgång: " + (millisStop - millisStart) + " millisekunder" );
                 return null;
+
             }
         } catch (Exception e) {
+            long millisStop = Calendar.getInstance().getTimeInMillis();
+            System.out.println("Tidsåtgång: " + (millisStop - millisStart) + " millisekunder" );
             e.printStackTrace();
             return null;
         }

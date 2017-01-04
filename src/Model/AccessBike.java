@@ -53,7 +53,7 @@ public class AccessBike {
         }
         try {
             conn = DBUtil.getConnection(dataBase);
-            String sql = "CALL insert_bike(?,?,?,?,?,?)";
+            String sql = "CALL insert_bike(?,?,?,?,?,?,?)";
             CallableStatement cs = conn.prepareCall(sql);
             cs.setString(1, newBike.getBrandName());
             cs.setString(2, newBike.getType());
@@ -62,6 +62,7 @@ public class AccessBike {
             cs.setInt(5, newBike.getSize());
             ByteArrayInputStream bais = newBike.getImageStream();
             cs.setBinaryStream(6, bais);
+            cs.setInt(7,newBike.getState());
             ResultSet rs = cs.executeQuery();
             if (rs.next()) {
                 newBike.setBikeID(rs.getInt("bikeID"));
@@ -363,7 +364,6 @@ public class AccessBike {
                 Blob blob = rs.getBlob("image");
                 byte[] bytes = blob.getBytes(1, (int) blob.length());
                 ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-                System.out.println(bis + " null eller inte? ");
                tempBike.setImageStream(bis);
                 tempBike.setSize(rs.getInt("size"));
                 tempBike.setType(rs.getString("typeName"));
