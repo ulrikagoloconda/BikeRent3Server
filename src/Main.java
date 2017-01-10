@@ -1,9 +1,7 @@
 ;import Interfaces.DBAccess;
-import Model.AccessBike;
-import Model.AccessUser;
-import Model.Bike;
-import Model.DBAccessImpl;
+import Model.*;
 import REST.RestRoot;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.io.ByteArrayInputStream;
@@ -16,26 +14,35 @@ public class Main {
 private static ByteArrayInputStream stream;
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
-		//AccessUser.UpdateUser("golo","golo",10,"gologologolo@golo.com",400,"Ulrika", "Golo");
-		Bike b = AccessBike.getBikeByID(17);
-		stream = b.getImageStream();
-
+		RestRoot restRoot = new RestRoot();
+		//String json = "{"sessionToken":"9tact15mmvehr8t6g0mhblh580","userID":19}"
+		BikeUser user = new BikeUser();
+		user.setUserID(19);
+		user.setSessionToken("9tact15mmvehr8t6g0mhblh580");
+		Gson g = new Gson();
+		String s = g.toJson(user);
 		long millisStart = Calendar.getInstance().getTimeInMillis();
-		/*for(int i = 0; i < 10000; i++) {
+		restRoot.getAvailableBikes(s);
+		long millisStop = Calendar.getInstance().getTimeInMillis();
+		System.out.println("Tidsåtgång: " + (millisStop - millisStart));
+		//AccessUser.UpdateUser("golo","golo",10,"gologologolo@golo.com",400,"Ulrika", "Golo");
+	//	Bike b = AccessBike.getBikeByID(17);
+		//stream = b.getImageStream();
+
+	/*	for(int i = 0; i < 50; i++) {
 			addBikesChild();
 		}*/
 
-		for(int i = 28742; i < 28742+5000; i++){
+	/*	for(int i = 37887; i < 37887+2; i++){
 			deletBikes(i);
 			/*
 			27256
 			18756
 
 			18741  st = 69223 millisekunder
-			*/
-		}
-		long millisStop = Calendar.getInstance().getTimeInMillis();
-		System.out.println("Tidsåtgång: " + (millisStop - millisStart) + " millisekunder" );
+
+		}*/
+		//System.out.println("Tidsåtgång: " + (millisStop - millisStart) + " millisekunder" );
 		/*
 		17729st
 		18730

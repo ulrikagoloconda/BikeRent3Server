@@ -151,29 +151,29 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public String getAvailableBikes(String json) {
-        long millisStart = Calendar.getInstance().getTimeInMillis();
+
 
         try {
             Gson gson = new Gson();
             BikeUser user = gson.fromJson(json, BikeUser.class);
             String clientToken = dbAccess.readSessionToken(user.getUserID());
             if (user.getSessionToken().equals(clientToken)) {
+                long millisStartdb = Calendar.getInstance().getTimeInMillis();
                 ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+                long millisStoptdb = Calendar.getInstance().getTimeInMillis();
+                System.out.println("Tidsåtgång läsa från databas: " + (millisStoptdb - millisStartdb) + " millisekunder" );
                 Bikes bikeCollection = new Bikes();
                 bikeCollection.setBikes(availableBikes);
+                long millisStart = Calendar.getInstance().getTimeInMillis();
                 String returnJson = gson.toJson(bikeCollection);
                 long millisStop = Calendar.getInstance().getTimeInMillis();
-                System.out.println("Tidsåtgång: " + (millisStop - millisStart) + " millisekunder" );
+                System.out.println("Tidsåtgång göra om från objekt till json: " + (millisStop - millisStart) + " millisekunder" );
                 return returnJson;
             } else {
-                long millisStop = Calendar.getInstance().getTimeInMillis();
-                System.out.println("Tidsåtgång: " + (millisStop - millisStart) + " millisekunder" );
                 return null;
 
             }
         } catch (Exception e) {
-            long millisStop = Calendar.getInstance().getTimeInMillis();
-            System.out.println("Tidsåtgång: " + (millisStop - millisStart) + " millisekunder" );
             e.printStackTrace();
             return null;
         }
