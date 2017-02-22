@@ -2,12 +2,14 @@
 package REST;
 
 import Interfaces.DBAccess;
+import Interfaces.InsertNewUser;
 import Model.*;
 import com.google.gson.Gson;
 import helpers.AuthHelper;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
@@ -20,7 +22,7 @@ import java.util.Map;
 @Path("/resources")
 public class RestRoot {
   private DBAccess dbAccess = new DBAccessImpl();
-  private BikeUser currentUser;
+
 
     //Metoden loggar in användaren i programmet och sakapar en randomiserad sträng, ett session_token, som sedan returneras och
     //sparas på klienten.
@@ -28,6 +30,7 @@ public class RestRoot {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.TEXT_PLAIN)
   public String loginBikeUser(String json) {
+      BikeUser currentUser = null;
     Gson gson = new Gson();
     BikeUser user;
     user = gson.fromJson(json, BikeUser.class);
@@ -76,13 +79,10 @@ public class RestRoot {
     Gson gson = new Gson();
     BikeUser newUser;
     newUser = gson.fromJson(json, BikeUser.class);
-      System.out.println(newUser.getPhone() + " i new user phone ");
     boolean isNewUserOK = false;
     try {
-      isNewUserOK = dbAccess.InsertNewUser(
-          //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
-          //isUpdateUserOK = dbAccess.UpdateUser(currentUser.getfName(), currentUser.getlName(), in_memberlevel, currentUser.getEmail(), currentUser.getPhone(), currentUser.getUserName(), "1234");
-          newUser.getfName(), newUser.getUserName(), newUser.getMemberLevel(), newUser.getEmail(), newUser.getPhone(), newUser.getUserName(), newUser.getPassw());
+      isNewUserOK = dbAccess.insertNewUser(
+          newUser.getfName(), newUser.getUserName(), newUser.getMemberLevel(), newUser.getBirthYear(), newUser.getEmail(), newUser.getPhone(), newUser.getUserName(), newUser.getGender(), newUser.getPassw());
       System.out.println("update ?: " + isNewUserOK);
 
 
@@ -261,7 +261,9 @@ public class RestRoot {
         Gson gson = new Gson();
         MainViewInformaiton mvi = gson.fromJson(json, MainViewInformaiton.class);
         String clientToken = dbAccess.readSessionToken(mvi.getCurrentUser().getUserID());
+        System.out.println("I executeRental innan if ");
         if (mvi.getCurrentUser().getSessionToken().equals(clientToken)) {
+            System.out.println("I executeRental efter if ");
             Bike returnBike = dbAccess.executeBikeLoan(mvi.getBikeToRentID(), mvi.getCurrentUser().getUserID());
             Gson gson1 = new Gson();
             String returnJson = gson1.toJson(returnBike);

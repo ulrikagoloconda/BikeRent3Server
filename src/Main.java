@@ -14,9 +14,20 @@ public class Main {
 private static ByteArrayInputStream stream;
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
-		RestRoot restRoot = new RestRoot();
-		//String json = "{"sessionToken":"9tact15mmvehr8t6g0mhblh580","userID":19}"
+		AccessBike.executeBikeLoan(21,19);
+	/*	RestRoot restRoot = new RestRoot();
 		BikeUser user = new BikeUser();
+		user.setUserName("Demo123");
+		user.setPassw("Demo123");
+		Gson g = new Gson();
+		long millisStart = Calendar.getInstance().getTimeInMillis();
+		System.out.println("start " + millisStart);
+		AccessBike.selectAvailableBikes();
+		long millisStop = Calendar.getInstance().getTimeInMillis();
+		System.out.println("läsa från databas available bikes " + (millisStop-millisStart));
+		//restRoot.loginBikeUser(g.toJson(user));
+		//String json = "{"sessionToken":"9tact15mmvehr8t6g0mhblh580","userID":19}"
+		/*BikeUser user = new BikeUser();
 		user.setUserID(19);
 		user.setSessionToken("9tact15mmvehr8t6g0mhblh580");
 		Gson g = new Gson();

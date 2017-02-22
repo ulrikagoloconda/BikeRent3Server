@@ -29,6 +29,10 @@
           <element id="library" level="module" name="validation-api-1.1.0.Final.jar" module-name="BikeRent3Server" />
           <element id="library" level="module" name="gson-2.8.0.jar" module-name="BikeRent3Server" />
           <element id="library" level="module" name="mysql-connector-java-5.1.39-bin.jar" module-name="BikeRent3Server" />
+          <element id="library" level="project" name="mysql-connector-java-5.1.39-bin" />
+          <element id="library" level="project" name="jersey-client-2.24.1" />
+          <element id="library" level="project" name="jersey-multipart-1.19.1" />
+          <element id="library" level="project" name="gson-2.8.0" />
         </element>
       </element>
       <element id="javaee-facet-resources" facet="BikeRent3Server/web/Web" />

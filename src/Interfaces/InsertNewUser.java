@@ -1,6 +1,7 @@
 package Interfaces;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 /**
  * @author Niklas Karlsson
@@ -9,7 +10,7 @@ import java.sql.SQLException;
  */
 public interface InsertNewUser {
 
-  boolean InsertNewUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) throws SQLException;
+  boolean InsertNewUser(String fname, String lname, int memberlevel, LocalDate year, String email, int phone, String username, String gender, String passw) throws SQLException;
   /**
    * TO use the: boolean insertNewUser(String fname, String lname, int memberlevel, String email, int phone , String username , String passw , Date membersince  )
    *

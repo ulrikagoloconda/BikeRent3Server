@@ -1,6 +1,7 @@
 package Model;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.ArrayList;
 
 /**
@@ -13,6 +14,8 @@ public class BikeUser {
     private String userName;
     private String fName;
     private String lName;
+    private String gender;
+    private Year birthYear;
     private int memberLevel;
     private String email;
     private int phone;
@@ -21,6 +24,7 @@ public class BikeUser {
     private String sessionToken;
     private ArrayList<Bike> currentBikeLoans;
     private ArrayList<Integer> totalBikeLoans;
+
 
     public BikeUser() {
 
@@ -135,6 +139,22 @@ public class BikeUser {
 
     public void setSessionToken(String sessionToken) {
         this.sessionToken = sessionToken;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Year getBirthYear() {
+        return birthYear;
+    }
+
+    public void setBirthYear(Year birthYear) {
+        this.birthYear = birthYear;
     }
 }
 

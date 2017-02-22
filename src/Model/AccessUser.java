@@ -4,6 +4,7 @@ import helpers.AuthHelper;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.Year;
 
 /**
  * @author Niklas Karlsson
@@ -149,10 +150,13 @@ public class AccessUser {
     }
 
 
-    public static boolean insertNewUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) {
-        String SQLInsertUser = "SELECT insert_new_user(?, ?, ?, ?, ?, ?, ?, ?)";
+    public static boolean insertNewUser(String fname, String lname, int memberlevel, Year year, String email, int phone, String username, String gender, String passw) {
+        //in_fname varchar(50),in_lname varchar(11),in_memberlevel varchar(11), in_birth_year YEAR, in_email varchar(50),in_phone varchar(11),
+        // in_username varchar(11), in_gender ENUM('Male', 'Female', 'Other'), salt_in VARCHAR(40),in_passw varchar(50))
+        String SQLInsertUser = "SELECT insert_new_user(?, ?, ?, ?, ?, ?, ?, ?,?,?)";
         ResultSet rs = null;
         DBType dataBase = null;
+        String genderSQL = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
             dataBase = DBType.Niklas;
         } else {
@@ -162,23 +166,33 @@ public class AccessUser {
               Connection conn = DBUtil.getConnection(dataBase); //database_user type like ENUM and get PW :-);
               PreparedStatement stmt = conn.prepareStatement(SQLInsertUser, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         ) {
-            //in_fname varchar(50),in_lname varchar(11),in_memberlevel varchar(11),in_email varchar(50),
-            // in_phone varchar(11),in_username varchar(11), salt_in VARCHAR(20),in_passw varchar(50)) RETURNS smallint(6
+            //in_fname varchar(50),in_lname varchar(11),in_memberlevel varchar(11), in_birth_year YEAR, in_email varchar(50),in_phone varchar(11),
+            // in_username varchar(11), in_gender ENUM('Male', 'Female', 'Other'), salt_in VARCHAR(40),in_passw varchar(50))
+
+            if(gender.equals("Kvinna")){
+                genderSQL = "Female";
+            }else if (gender.equals("Man")){
+                genderSQL = "Male";
+            } else {
+                genderSQL = "Other";
+            }
             String salt = AuthHelper.generateValidationToken();
             stmt.setString(1, fname);
             stmt.setString(2, lname);
             stmt.setInt(3, memberlevel);
-            stmt.setString(4, email);
-            stmt.setInt(5, phone);
-            stmt.setString(6, username);
-            stmt.setString(7,salt);
-            stmt.setString(8, passw);
+            LocalDate ld = LocalDate.of(year.getValue(),10,1);
+            stmt.setDate(4,Date.valueOf(ld));
+            stmt.setString(5, email);
+            stmt.setInt(6, phone);
+            stmt.setString(7, username);
+            stmt.setString(8, genderSQL);
+            stmt.setString(9,salt);
+            stmt.setString(10, passw);
             rs = stmt.executeQuery();
             int nrFound = 0;
-          System.out.println("Det har blivit nåt i AccessUser insertNewUser");
             while (rs.next()) {
-              System.out.println("Det har blivit nåt i AccessUser insertNewUser");
                 boolean isAddOK = rs.getBoolean(1);
+                int intisadd = rs.getInt(1);
                 return isAddOK;
             }
         } catch (SQLException e) {

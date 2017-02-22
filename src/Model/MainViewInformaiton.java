@@ -1,5 +1,7 @@
 package Model;
 
+import java.io.ByteArrayInputStream;
+
 /**
  * Created by Goloconda on 2016-12-02.
  */
@@ -16,6 +18,7 @@ public class MainViewInformaiton {
     private BikeUser alteredUser;
     private Bike newBike;
     private int rentedBikes;
+
 
 
     public MainViewInformaiton() {

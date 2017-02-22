@@ -6,6 +6,8 @@ import Model.BikeUser;
 
 
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ import java.util.Map;
  * @version 1.0
  * @since 2016-09-16
  */
-public interface DBAccess {
+public interface DBAccess{
     Bike insertNewBike(Bike newBike);
     ArrayList<Bike> selectAvailableBikes();
     ArrayList<BikeUser> searchUserByWildcard(String search);
@@ -25,7 +27,6 @@ public interface DBAccess {
     int averageLoanPerUser();
     BikeUser logIn(String userName, String passW) throws SQLException;
     boolean isUserAvalible(String userName) throws SQLException;
-    boolean InsertNewUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) throws SQLException;
     ArrayList<Bike> getAllBikes();
     boolean UpdateUser(String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password)throws SQLException;
     Bike executeBikeLoan(int bikeID, int userID);
@@ -40,4 +41,5 @@ public interface DBAccess {
     boolean isSessionOpen(int userID);
     int getTotalNumOfbikes();
     int getNumOfCurrentAvailableBikes();
+    boolean insertNewUser(String fname, String lname, int memberlevel, Year year, String email, int phone, String username, String gender, String passw);
 }

@@ -214,9 +214,10 @@ public class AccessBike {
             dataBase = DBType.Ulrika;
         }
         try {
+            System.out.println("Körs detta i accessBike execute ");
             conn = DBUtil.getConnection(dataBase);
             conn.setAutoCommit(false);
-            String sql = "CALL execute_bike_loan(?,?,?, ?)";
+            String sql = "CALL execute_bike_loan(?,?,?,?)";
             CallableStatement cs = conn.prepareCall(sql);
             cs.setInt(1, userID);
             cs.setInt(2, bikeID);
@@ -228,6 +229,7 @@ public class AccessBike {
             returnBike = getBikeByID(bikeID);
             returnBike.setDayOfReturn(dayOfReturn.toLocalDate());
             conn.commit();
+            System.out.println(returnBike.getDayOfReturn() + " day of return");
             return returnBike;
 
         } catch (Exception e) {
