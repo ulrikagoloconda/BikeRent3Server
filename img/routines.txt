@@ -1,0 +1,750 @@
+use bikerentex;
+
+CREATE FUNCTION `bike_maintenance_percent`()
+  RETURNS DECIMAL(5, 2)
+  BEGIN
+    DECLARE return_value DECIMAL(5,2);
+    SET return_value = ((select count(bikeID) FROM bike WHERE state = 2)/get_total_num_bikes())*100;
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `category_percent`(`in_cat` VARCHAR(20), `in_lower_age` INT(11), `in_higher_age` INT(11))
+  RETURNS DECIMAL(5, 2)
+  BEGIN
+    DECLARE return_value DECIMAL(5,2);
+    SET return_value = (select count(userID) FROM bikeuser WHERE gender=in_cat AND (year(curdate()) - birth_year) >= in_lower_age AND (year(curdate())- birth_year) < in_higher_age)/number_of_users()*100;
+    RETURN return_value;
+  END;
+
+CREATE PROCEDURE `check_open_sessions`()
+  BEGIN
+    DECLARE sessionIDTemp INT(11) DEFAULT 0;
+    DECLARE sessionOpen DATETIME;
+    DECLARE finished INTEGER DEFAULT 0;
+    DECLARE row_cursor CURSOR FOR SELECT sessionID FROM active_session;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished = 1;
+
+    OPEN row_cursor;
+    check_sessionID:LOOP
+      FETCH row_cursor INTO sessionIDTemp;
+      IF finished = 1 THEN
+        LEAVE check_sessionID;
+      END IF;
+      SET sessionOpen = (SELECT opened FROM active_session WHERE sessionID= sessionIDTemp AND closed IS NULL);
+      IF DATEDIFF(now(), sessionOpen) > 0
+      THEN
+        UPDATE active_session SET closed=now() WHERE sessionID= sessionIDTemp AND opened=sessionOpen;
+      END IF;
+    END LOOP check_sessionID;
+  END;
+
+CREATE PROCEDURE `check_password_get_bikeuser`(IN  `tryusername` VARCHAR(50), IN `trypassword` VARCHAR(50),
+                                               OUT `message`     INT(10))
+  BEGIN
+    DECLARE decUserID INT(10);
+    DECLARE decSalt VARCHAR(30);
+    DECLARE decPasswID INT(10);
+    SET decUserID = (SELECT userID FROM bikeuser WHERE username = tryusername);
+    set decSalt = (SELECT salt FROM passw WHERE userID=decUserID);
+    set decPasswID = (SELECT passw_id FROM passw WHERE aes_encrypt(trypassword,decSalt)=passw AND userID=decUserID);
+    if (decPasswID> 0)
+    THEN
+      SELECT * FROM bikeuser WHERE userID = decUserID;
+      SET message = decUserID;
+    ELSE
+      SET message = -50;
+    END IF;
+  END;
+
+CREATE PROCEDURE `delete_bike`(IN `idIn` INT(11))
+  BEGIN
+    DELETE FROM bike WHERE bikeID=idIn;
+  END;
+
+CREATE FUNCTION `disabled_bikes_percent`()
+  RETURNS DECIMAL(5, 2)
+  BEGIN
+    DECLARE return_value DECIMAL(5,2);
+    SET return_value = ((select count(bikeID) FROM bike WHERE state = 1)/get_total_num_bikes())*100;
+    RETURN return_value;
+  END;
+
+CREATE PROCEDURE `execute_bike_loan`(IN  `userIDIn`  INT(10), IN `bikeIDIn` INT(11), IN `dayOfLoanIn` DATE,
+                                     OUT `expReturn` DATE)
+  BEGIN
+    SET expReturn = (SELECT DATE_ADD(dayOfLoanIn, INTERVAL 1 MONTH));
+    INSERT INTO rentbridge
+    (userID, bikeID,dayOfRent, dayOfReturn)
+      VALUE (userIDIn, bikeIDIn, dayOfLoanIn, expReturn);
+
+  END;
+
+CREATE PROCEDURE `get_all_bikes`()
+  BEGIN
+    SELECT bike.bikeID, bike.modelyear, bike.color, bike.size, bike.modelyear, brand.brandname, type.typeName
+    FROM bike
+      JOIN type ON bike.typeID = type.typeID
+      JOIN brand On bike.brandid = brand.brandid;
+  END;
+
+CREATE PROCEDURE `get_bike_returnedDate_from_ID`(IN `bikeIDIn` INT(11))
+  BEGIN
+    SELECT bike.bikeID, brand.brandname, type.typeName, bike.modelyear, bike.color, bike.image, bike.size,
+      rentbridge.dayOfRent, rentbridge.dayOfActualReturn
+    from bike
+      JOIN brand
+        ON bike.brandid = brand.brandid
+      JOIN type
+        ON bike.typeID = type.typeID
+      LEFT JOIN rentbridge
+        ON bike.bikeID = rentbridge.bikeID
+    WHERE bike.bikeID=bikeIDIn;
+
+  END;
+
+CREATE FUNCTION `get_category`(`in_birthyear` INT(11))
+  RETURNS VARCHAR(50)
+  BEGIN
+    DECLARE return_value VARCHAR(50);
+    DECLARE first_nr int;
+    set first_nr = left((year(curdate()) - in_birthyear),1);
+    set return_value = (SELECT concat(first_nr,'0_to_',(first_nr+1),'0'));
+    RETURN return_value;
+  END;
+
+CREATE PROCEDURE `get_num_of_curr_available_bikes`()
+  BEGIN
+    SELECT count(bike.bikeID) as count FROM bike
+      LEFT JOIN rentbridge ON bike.bikeID = rentbridge.bikeID
+
+    WHERE bike.state >2 and NOT EXISTS
+    (SELECT 1 FROM rentbridge WHERE bikeID = bike.bikeID AND dayOfActualReturn is null)
+    ;
+  END;
+
+CREATE PROCEDURE `get_num_of_total_bikes`()
+  BEGIN
+    SELECT COUNT(bikeID) as totalBikes FROM bike;
+  END;
+
+CREATE PROCEDURE `get_report`(IN `in_user_id` INT(11), IN `in_commment` VARCHAR(300))
+  BEGIN
+    START TRANSACTION;
+    insert into report(total_num_of_bikes,
+                       available_bikes_percent,
+                       usable_bikes_percent,
+                       maintenance_percent,
+                       disabled_percent,
+                       total_number_of_users,
+                       male_users_percent,
+                       female_users_percent,
+                       other_users_percent,
+                       male_20_to_30_percent,
+                       male_30_to_40_percent,
+                       male_40_to_50_percent,
+                       male_50_or_more_percent,
+                       female_20_to_30_percent,
+                       female_30_to_40_percent,
+                       female_40_to_50_percent,
+                       female_50_or_more_percent,
+                       other_20_to_30_percent,
+                       other_30_to_40_percent,
+                       other_40_to_50_percent,
+                       other_50_or_more_percent,
+                       new_loans_30_days_back_total,
+                       new_loans_30_days_back_male_percent,
+                       new_loans_30_days_back_female_percent,
+                       new_loans_30_days_back_other_percent,
+                       most_active_user_group_total,
+                       least_active_user_group_total,
+                       most_active_user_group_30_days_back,
+                       least_active_user_group_30_days_back,
+                       nr_1_popular_bike,
+                       nr_2_popular_bike,
+                       nr_3_popular_bike,
+                       nr_4_popular_bike,
+                       nr_5_popular_bike,
+                       nr_1_least_popular_bike,
+                       generated_by,
+                       generated_by_id,
+                       comment,
+                       date_of_report)
+      select * , in_commment ,now() from statistic_view where generated_by_id=in_user_id;
+
+    SELECT * FROM report WHERE report_id=last_insert_id();
+    COMMIT ;
+  END;
+
+CREATE FUNCTION `get_total_num_bikes`()
+  RETURNS INT(11)
+  BEGIN
+    DECLARE return_value INT(10);
+    set return_value = (SELECT COUNT(bikeID) as totalBikes FROM bike);
+    RETURN return_value;
+  END;
+
+CREATE PROCEDURE `getUserFromUserName`(IN `in_username` VARCHAR(50))
+  BEGIN
+    SELECT * FROM bikeuser
+    WHERE username = in_username;
+  END;
+
+CREATE PROCEDURE `insert_bike`(IN `brandNameIn` VARCHAR(50), IN `typeIn` VARCHAR(30), IN `modelYearIn` SMALLINT(6),
+                               IN `colorIn`     VARCHAR(50), IN `sizeIn` SMALLINT(6), IN `imageIn` LONGBLOB,
+                               IN `stateIn`     INT(10))
+  BEGIN
+    DECLARE brandIDDec INT(11);
+    DECLARE typeIDDec INT(10);
+
+    IF EXISTS(SELECT DISTINCT brandid FROM brand WHERE brandname=brandNameIn)
+    THEN
+      SET brandIDDec = (SELECT DISTINCT brandid FROM brand WHERE brandname=brandNameIn);
+    ELSE
+      INSERT INTO brand (brandname) VALUE (brandNameIn) ;
+      SELECT DISTINCT last_insert_id() INTO brandIDDec FROM brand;
+    END IF;
+    IF EXISTS(SELECT DISTINCT typeID FROM type WHERE typeName=typeIn)
+    THEN
+      SET typeIDDec = (SELECT DISTINCT typeID FROM type WHERE typeName=typeIn);
+    ELSE
+      INSERT INTO type (typeName)VALUE (typeIn);
+      SELECT DISTINCT last_insert_id() INTO typeIDDec;
+    END IF;
+    INSERT INTO bike (brandid, modelyear, color, size, insertDateTime, typeID,image,state)
+    VALUES (brandIDDec, modelYearIn, colorIn, sizeIn, CURRENT_TIMESTAMP(),typeIDDec,imageIn,stateIn);
+    SELECT last_insert_id() as bikeID;
+  END;
+
+CREATE FUNCTION `insert_new_user`(`in_fname`      VARCHAR(50), `in_lname` VARCHAR(11), `in_memberlevel` VARCHAR(11),
+                                  `in_birth_year` DATE, `in_email` VARCHAR(50), `in_phone` VARCHAR(11),
+                                  `in_username`   VARCHAR(11), `in_gender` ENUM ('Male', 'Female', 'Other'),
+                                  `salt_in`       VARCHAR(40), `in_passw` VARCHAR(50))
+  RETURNS SMALLINT(6)
+  BEGIN
+    DECLARE pw VARBINARY(56);
+    DECLARE userNameAvalible VARCHAR(11);
+    DECLARE newUserID INT(10);
+    DECLARE newPasswID INT(10);
+    if exists(SELECT username FROM bikeuser WHERE userName=in_username)
+    THEN
+      RETURN 0;
+    ELSE
+      INSERT INTO bikeuser (fname, lname, memberlevel, email, phone , username , membersince,birth_year,gender)
+      VALUES (in_fname, in_lname, in_memberlevel, in_email, in_phone , in_username , CURDATE(),YEAR(in_birth_year),in_gender);
+      SET newUserID = (SELECT userID FROM bikeuser WHERE username=in_username);
+      INSERT INTO passw (userID, passw, salt) VALUES (newUserID, AES_ENCRYPT(in_passw,salt_in),salt_in);
+      SET newPasswID = (SELECT passw_id FROM passw WHERE userID=newUserID);
+      UPDATE bikeuser SET passw_id=newPasswID WHERE userID= newUserID;
+      RETURN 1;
+    END IF;
+  END;
+
+CREATE FUNCTION `insert_new_user_old`(`in_fname` VARCHAR(50), `in_lname` VARCHAR(11), `in_memberlevel` VARCHAR(11),
+                                      `in_email` VARCHAR(50), `in_phone` VARCHAR(11), `in_username` VARCHAR(11),
+                                      `salt_in`  VARCHAR(40), `in_passw` VARCHAR(50))
+  RETURNS SMALLINT(6)
+  BEGIN
+    DECLARE pw VARBINARY(56);
+    DECLARE userNameAvalible VARCHAR(11);
+    DECLARE newUserID INT(10);
+    DECLARE newPasswID INT(10);
+    if exists(SELECT username FROM bikeuser WHERE userName=in_username)
+    THEN
+      RETURN 0;
+    ELSE
+      INSERT INTO bikeuser (fname, lname, memberlevel, email, phone , username , membersince)
+      VALUES (in_fname, in_lname, in_memberlevel, in_email, in_phone , in_username , CURDATE());
+      SET newUserID = (SELECT userID FROM bikeuser WHERE username=in_username);
+      INSERT INTO passw (userID, passw, salt) VALUES (newUserID, AES_ENCRYPT(in_passw,salt_in),salt_in);
+      SET newPasswID = (SELECT passw_id FROM passw WHERE userID=newUserID);
+      UPDATE bikeuser SET passw_id=newPasswID WHERE userID= newUserID;
+      RETURN 1;
+    END IF;
+  END;
+
+CREATE FUNCTION `least_active_user_group_30_days_back`()
+  RETURNS VARCHAR(100)
+  BEGIN
+    DECLARE return_value VARCHAR(100);
+    set return_value =(SELECT concat('gender: ',u.gender, ', category: ',u.category,', number_of_loans_30_days: ', count(r.rentID))
+                       FROM simpel_user as u JOIN rentbridge  as r ON u.user_id = r.userID
+                       WHERE datediff(curdate(), r.dayOfRent ) <= 30
+                       GROUP BY u.gender, u.category
+                       ORDER BY count(r.rentID) LIMIT 0,1);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `least_active_user_group_total`()
+  RETURNS VARCHAR(100)
+  BEGIN
+    DECLARE return_value VARCHAR(100);
+    set return_value =(SELECT concat('gender: ',u.gender, ', category: ',u.category,', total_number_of_loans: ', count(r.rentID)) FROM simpel_user as u JOIN rentbridge  as r ON u.user_id = r.userID
+    GROUP BY u.gender, u.category
+                       ORDER BY count(r.rentID) LIMIT 0,1);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `loans_in_order`(`in_rank` INT(11))
+  RETURNS VARCHAR(70)
+  BEGIN
+    DECLARE return_value VARCHAR(70);
+    DECLARE nr INT DEFAULT 0;
+    set nr = in_rank-1;
+    set return_value = (SELECT concat('type: ', b.typeName,', brand: ', b.brandname, ', model_year: ', b.modelyear, ' number_of_loans: ', count(r.rentID))
+                        FROM bike_object as b
+                          LEFT JOIN rentbridge  as r ON b.bikeID = r.bikeID
+                        GROUP BY b.typeName, b.brandname, b.modelyear
+                        ORDER BY count(r.rentID) DESC LIMIT nr,1);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `loans_in_order_least_popular`(`in_rank` INT(11))
+  RETURNS VARCHAR(70)
+  BEGIN
+    DECLARE return_value VARCHAR(70);
+    DECLARE nr INT DEFAULT 0;
+    set nr = in_rank-1;
+    set return_value = (SELECT concat('type: ', b.typeName,', brand: ', b.brandname, ', model_year: ', b.modelyear, ' number_of_loans: ', count(r.rentID))
+                        FROM bike_object as b
+                          LEFT JOIN rentbridge  as r ON b.bikeID = r.bikeID
+                        GROUP BY b.typeName, b.brandname, b.modelyear
+                        ORDER BY count(r.rentID) LIMIT nr,1);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `most_active_user_group_30_days_back`()
+  RETURNS VARCHAR(100)
+  BEGIN
+    DECLARE return_value VARCHAR(100);
+    set return_value =(SELECT concat('gender: ',u.gender, ', category: ',u.category,', number_of_loans_30_days: ', count(r.rentID))
+                       FROM simpel_user as u JOIN rentbridge  as r ON u.user_id = r.userID
+                       WHERE datediff(curdate(), r.dayOfRent ) <= 30
+                       GROUP BY u.gender, u.category
+                       ORDER BY count(r.rentID) DESC LIMIT 0,1);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `most_active_user_group_30_days_back_2`()
+  RETURNS VARCHAR(100)
+  BEGIN
+    DECLARE return_value VARCHAR(100);
+    set return_value =(SELECT concat('gender: ',u.gender, ', category: ',u.category,', total_number_of_loans: ', count(r.rentID))
+                       FROM simpel_user as u JOIN rentbridge  as r ON u.user_id = r.userID
+                       WHERE datediff(curdate(), r.dayOfRent ) <= 30
+                       GROUP BY u.gender, u.category
+                       ORDER BY count(r.rentID) DESC LIMIT 0,1);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `most_active_user_group_total`()
+  RETURNS VARCHAR(100)
+  BEGIN
+    DECLARE return_value VARCHAR(100);
+    set return_value =(SELECT concat('gender: ',u.gender, ', category: ',u.category,', total_number_of_loans: ', count(r.rentID)) FROM simpel_user as u JOIN rentbridge  as r ON u.user_id = r.userID
+    GROUP BY u.gender, u.category
+                       ORDER BY count(r.rentID) DESC LIMIT 0,1);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `new_loans_30_days_back_percent`(`in_gender` VARCHAR(20))
+  RETURNS DECIMAL(5, 2)
+  BEGIN
+    DECLARE return_value DECIMAL(5,2);
+    SET return_value = (SELECT (count(rentID) /new_loans_30_days_back_total()*100) FROM rentbridge
+      JOIN bikeuser ON bikeuser.userID=rentbridge.userID
+    WHERE datediff(curdate(),dayOfRent) <=30
+          AND bikeuser.gender=in_gender);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `new_loans_30_days_back_total`()
+  RETURNS INT(11)
+  BEGIN
+    DECLARE return_value int;
+    SET return_value = (SELECT count(rentID) FROM rentbridge WHERE datediff(curdate(),dayOfRent) <=30);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `num_of_curr_available_bikes`()
+  RETURNS INT(11)
+  BEGIN
+    DECLARE return_value INT(10) ;
+    set return_value = (SELECT count(*) as count from (SELECT count(bike.bikeID) FROM bike
+      LEFT JOIN rentbridge ON bike.bikeID = rentbridge.bikeID
+    WHERE bike.state >2 and NOT EXISTS
+    (SELECT 1 FROM rentbridge WHERE bikeID = bike.bikeID AND dayOfActualReturn is null)
+    GROUP BY bike.bikeID)as alias) ;
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `num_of_curr_available_bikes_2`()
+  RETURNS INT(11)
+  BEGIN
+    DECLARE return_value INT(10) ;
+    SET return_value = (SELECT count(bike.bikeID)
+                        FROM bike
+                          LEFT JOIN rentbridge ON bike.bikeID = rentbridge.bikeID
+                        WHERE bike.state >2
+                              and NOT EXISTS (SELECT 1 FROM rentbridge WHERE bikeID = bike.bikeID AND dayOfActualReturn is null));
+
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `num_of_usable_bikes`()
+  RETURNS INT(11)
+  BEGIN
+    DECLARE return_value INT(10);
+    SET return_value = (select count(bikeID) FROM bike WHERE state > 2);
+    RETURN return_value;
+  END;
+
+CREATE FUNCTION `number_of_users`()
+  RETURNS INT(11)
+  BEGIN
+    DECLARE return_value INT;
+    SET return_value = (select count(userID) FROM bikeuser);
+    RETURN return_value;
+  END;
+
+CREATE PROCEDURE `popular_bikes_in_order`(IN `in_rank` INT(11))
+  BEGIN
+    DECLARE i int DEFAULT 0;
+    DECLARE j int DEFAULT 0;
+    DECLARE nr INT DEFAULT 0;
+    DECLARE totalType INT DEFAULT 0;
+    DECLARE totalBrand INt DEFAULT 0;
+    DECLARE tempBrandName VARCHAR(50);
+    DECLARE tempTypeName VARCHAR(50);
+    DECLARE tempBikeID int DEFAULT 0;
+    DECLARE countNumberOf INT DEFAULT 0;
+    DECLARE return_value VARCHAR(70);
+
+    CREATE TEMPORARY TABLE popular_bikes (
+      count int,
+      brand_name VARCHAR(50),
+      modelYear SMALLINT,
+      type_name VARCHAR(50)
+    );
+    set totalType = (SELECT count(typeID) FROM type);
+    SET totalBrand = (SELECT count(brandID) FROM brand);
+
+    WHILE i<totalType DO
+      set tempTypeName= (SELECT typename FROM type LIMIT i,1 );
+      WHILE j < totalBrand DO
+        set tempBrandName = (SELECT brandname FROM brand LIMIT j,1);
+        set countNumberOf = (SELECT count(rentID) FROM rentbridge JOIN bike_object ON bike_object.bikeID=rentbridge.bikeID
+        WHERE bike_object.brandname=tempBrandName
+              AND bike_object.typeName=tempTypeName);
+        IF (countNumberOf>0)
+        THEN
+          INSERT INTO popular_bikes (count, brand_name, modelYear,type_name) VALUES (countNumberOf,tempBrandName,
+                                                                                     (SELECT modelYear FROM bike_object WHERE brandname=tempBrandName AND typeName=tempTypeName LIMIT 1), tempTypeName);
+        END IF;
+        set j = j+1;
+      END WHILE;
+      set i = i+1;
+      set j = 0;
+
+    END WHILE;
+
+    set nr = in_rank -1;
+    set return_value = 'Type: ';
+    set return_value = concat(return_value, (SELECT type_name FROM popular_bikes ORDER BY count DESC LIMIT nr,1));
+    set return_value = concat(return_value,' Brand: ');
+    set return_value = CONCAT(return_value,(SELECT brand_name FROM popular_bikes ORDER BY count DESC LIMIT nr,1));
+    set return_value = concat(return_value,' Model_year: ');
+    set return_value = CONCAT(return_value,(SELECT modelYear FROM popular_bikes ORDER BY count DESC LIMIT nr,1));
+    set return_value = concat(return_value,' Number_of_loans:');
+    set return_value = CONCAT(return_value,(SELECT count FROM popular_bikes ORDER BY count DESC LIMIT nr,1));
+    SELECT return_value;
+    DROP TABLE popular_bikes;
+  END;
+
+CREATE PROCEDURE `popular_bikes_in_order_2`()
+  BEGIN
+    DECLARE i int DEFAULT 0;
+    DECLARE j int DEFAULT 0;
+    DECLARE nr INT DEFAULT 0;
+    DECLARE totalType INT DEFAULT 0;
+    DECLARE totalBrand INt DEFAULT 0;
+    DECLARE totalPopularBikes INT DEFAULT 0;
+    DECLARE tempBrandName VARCHAR(50);
+    DECLARE tempTypeName VARCHAR(50);
+    DECLARE tempBikeID int DEFAULT 0;
+    DECLARE tempID int DEFAULT 0;
+    DECLARE countNumberOf INT DEFAULT 0;
+    DECLARE return_value VARCHAR(70);
+
+    set totalType = (SELECT count(typeID) FROM type);
+    SET totalBrand = (SELECT count(brandID) FROM brand);
+    DELETE FROM popular_bikes;
+    WHILE i<totalType DO
+      set tempTypeName= (SELECT typename FROM type LIMIT i,1 );
+      WHILE j < totalBrand DO
+        set tempBrandName = (SELECT brandname FROM brand LIMIT j,1);
+        set countNumberOf = (SELECT count(rentID) FROM rentbridge JOIN bike_object ON bike_object.bikeID=rentbridge.bikeID
+        WHERE bike_object.brandname=tempBrandName
+              AND bike_object.typeName=tempTypeName);
+        if exists(SELECT 1 FROM bike_object WHERE brandname = tempBrandName AND typeName = tempTypeName AND modelyear is NOT null)
+        THEN
+          INSERT INTO popular_bikes (count, brand_name, modelYear,type_name,image) VALUES (countNumberOf,tempBrandName,
+                                                                                           (SELECT modelYear FROM bike_object WHERE brandname=tempBrandName AND typeName=tempTypeName LIMIT 1), tempTypeName,
+                                                                                           (SELECT image FROM bike_object WHERE brandname=tempBrandName AND typeName=tempTypeName LIMIT 1));
+        END IF;
+        set j = j+1;
+      END WHILE;
+      set i = i+1;
+      set j = 0;
+
+    END WHILE;
+
+    SET i = 0;
+    SET totalPopularBikes = (SELECT count(id) FROM popular_bikes);
+    WHILE i < totalPopularBikes  DO
+      set tempID = (SELECT id FROM popular_bikes ORDER BY count DESC LIMIT i,1);
+      set return_value = 'Type: ';
+      set return_value = concat(return_value, (SELECT type_name FROM popular_bikes ORDER BY count DESC LIMIT i,1));
+      set return_value = concat(return_value,', Brand: ');
+      set return_value = CONCAT(return_value,(SELECT brand_name FROM popular_bikes ORDER BY count DESC LIMIT i,1));
+      set return_value = concat(return_value,', Model_year: ');
+      set return_value = CONCAT(return_value,(SELECT modelYear FROM popular_bikes ORDER BY count DESC LIMIT i,1));
+      set return_value = concat(return_value,', Number_of_loans: ');
+      set return_value = CONCAT(return_value,(SELECT count FROM popular_bikes ORDER BY count DESC LIMIT i,1));
+      UPDATE popular_bikes SET info_string = return_value WHERE id = tempID;
+      set i = i+1;
+    END WHILE;
+  END;
+
+CREATE FUNCTION `popular_bikes_order_func`(`in_rank` INT(11))
+  RETURNS VARCHAR(70)
+  BEGIN
+    DECLARE nr INT;
+    DECLARE return_value VARCHAR(70);
+    set nr = in_rank -1;
+    set return_value = (SELECT info_string FROM popular_bikes ORDER BY count DESC LIMIT nr,1);
+    RETURN return_value;
+  END;
+
+CREATE PROCEDURE `return_bike`(IN `bikeIDin` INT(11), IN `userIDIn` INT(11))
+  BEGIN
+    DECLARE tempRentID INTEGER(10);
+    if exists(SELECT rentID  FROM rentbridge  WHERE userID=userIDIn AND bikeID=bikeIDin AND dayOfActualReturn is null )
+    THEN
+      Set tempRentID = (SELECT rentID FROM rentbridge WHERE userID=userIDIn AND bikeID=bikeIDin AND dayOfActualReturn is null);
+      UPDATE rentbridge SET dayOfActualReturn=NOW() WHERE rentID=tempRentID;
+      SELECT  'det funkar ';
+    ELSE
+      SELECT 'Inget lån matchar kriterierna';
+    END IF;
+  END;
+
+CREATE PROCEDURE `search_10_next_available_bikes`(IN `in_from_row` INT(11))
+  BEGIN
+    SELECT  * FROM bike_object
+      LEFT JOIN rentbridge ON bike_object.bikeID = rentbridge.bikeID
+    WHERE bike_object.state>2 and not EXISTS
+    (SELECT 1 FROM rentbridge WHERE bikeID = bike_object.bikeID AND dayOfActualReturn is null)
+    GROUP BY bike_object.bikeID LIMIT in_from_row,10;
+  END;
+
+CREATE PROCEDURE `search_available_bikes`()
+  BEGIN
+    SELECT  * FROM bike_object
+      LEFT JOIN rentbridge ON bike_object.bikeID = rentbridge.bikeID
+    WHERE bike_object.state> 2 AND not EXISTS
+    (SELECT 1 FROM rentbridge WHERE bikeID = bike_object.bikeID AND dayOfActualReturn is null)
+    GROUP BY bike_object.bikeID;
+  END;
+
+CREATE PROCEDURE `search_by_string`(IN `text` VARCHAR(100))
+  BEGIN
+    SELECT bike.bikeID, bike.color, brand.brandname, type.typeName
+    FROM bike
+      JOIN brand
+        ON bike.brandid = brand.brandid
+      JOIN type
+        ON bike.typeID = type.typeID
+    WHERE bike.color LIKE CONCAT('%',text,'%')
+          OR brand.brandname LIKE CONCAT('%',text,'%')
+          OR type.typeName LIKE CONCAT('%',text, '%');
+  END;
+
+CREATE PROCEDURE `size_of_search_available_bikes_mb`()
+  BEGIN
+    CREATE TEMPORARY TABLE IF NOT EXISTS count_bit AS (SELECT modelyear, color, image
+                                                         , size, state, typeName, brandname,
+                                                         bike_object.bikeID FROM bike_object
+      LEFT JOIN rentbridge ON bike_object.bikeID = rentbridge.bikeID
+                                                       WHERE bike_object.state> 2 AND not EXISTS
+                                                       (SELECT 1 FROM rentbridge WHERE rentbridge.bikeID = bike_object.bikeID AND dayOfActualReturn is null)
+                                                       GROUP BY bike_object.bikeID);
+
+    SELECT round((sum(bit_length(image)) + sum(bit_length(count_bit.bikeID)) + sum(bit_length(modelyear))
+                  + sum(bit_length(color))+ sum(bit_length(size)) + sum(bit_length(typeName))
+                  + sum(bit_length(state)) + sum(bit_length(brandname))) / 8388608 , 2) as hej FROM count_bit;
+    DROP TABLE count_bit;
+  END;
+
+CREATE FUNCTION `size_of_search_available_bikes_mb_func`()
+  RETURNS DECIMAL(5, 2)
+  BEGIN
+    DECLARE return_value DECIMAL(5,2);
+
+    set return_value = (SELECT (sum(bit_length(image)) + sum(bit_length(bike_object.bikeID)) + sum(bit_length(modelyear))
+                                + sum(bit_length(color))+ sum(bit_length(size)) + sum(bit_length(typeName))
+                                + sum(bit_length(state)) + sum(bit_length(brandname))) / 8388608 as mb FROM bike_object
+      LEFT JOIN rentbridge ON bike_object.bikeID = rentbridge.bikeID
+                        WHERE bike_object.state> 2 AND not EXISTS
+                        (SELECT 1 FROM rentbridge WHERE rentbridge.bikeID = bike_object.bikeID AND dayOfActualReturn is null));
+
+    RETURN return_value;
+  END;
+
+CREATE PROCEDURE `store_performance_measurement`(IN  `in_date`              DATETIME, IN `in_total_time` DECIMAL(10),
+                                                 IN  `in_db_procedure`      DECIMAL(10),
+                                                 IN  `in_read_from_db_jdbc` DECIMAL(10),
+                                                 IN  `in_gson_to_json`      DECIMAL(10), IN `in_execute` DECIMAL(10),
+                                                 IN  `in_gson_from_json`    DECIMAL(10),
+                                                 IN  `in_read_one_bike`     DECIMAL(10), IN `in_comment` VARCHAR(500),
+                                                 OUT `out_generated_key`    INT(11))
+  BEGIN
+    START TRANSACTION;
+
+    INSERT INTO prestanda_measurement_available_bikes (date, total_time_sec, db_procedure_sec, read_from_db_jdbc_sec,
+                                                       gson_to_json_sec, execute_sec, gson_from_json_sec, comment,total_size_data_mb)
+      VALUE (in_date,in_total_time,in_db_procedure, in_read_from_db_jdbc, in_gson_to_json, in_execute,
+             in_gson_from_json, in_comment, size_of_search_available_bikes_mb_func());
+    set out_generated_key = last_insert_id();
+    SELECT size_of_search_available_bikes_mb_func(), out_generated_key;
+    COMMIT;
+  END;
+
+CREATE PROCEDURE `temp_return_password_binary`(IN  `userNameIn`  VARCHAR(40), IN `tryPasswordIn` VARCHAR(40),
+                                               OUT `passwordBin` VARBINARY(56), OUT `tryPasswordOut` VARBINARY(56),
+                                               OUT `userIDOut`   INT(10))
+  BEGIN
+
+    IF EXISTS (SELECT userID FRom bikeuser WHERE username = userNameIn)
+    THEN
+      SET passwordBin = (SELECT passw FROM bikeuser WHERE username = userNameIn);
+      SET tryPasswordOut = (AES_ENCRYPT(tryPasswordIn,'tackforkaffet'));
+      SET userIDOut = (SELECT userID FRom bikeuser WHERE username = userNameIn);
+    ELSE
+      SET tryPasswordOut = '';
+      SET passwordBin = '';
+      SELECT userIDOut = -1;
+    END IF;
+  END;
+
+CREATE PROCEDURE `update_memberlevel`()
+  BEGIN
+    DECLARE finished INTEGER DEFAULT 0;
+    DECLARE userIDTemp INT(11) DEFAULT 0;
+    DECLARE sum_delayTemp INT(11) DEFAULT 0;
+    DECLARE number_of_loan INT(11) DEFAULT 0;
+    DECLARE row_cursor CURSOR FOR SELECT userid
+                                  FROM bikeuser;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished = 1;
+    OPEN row_cursor;
+    get_userid:LOOP
+      FETCH row_cursor INTO userIDTemp;
+      IF finished = 1 THEN
+        LEAVE get_userid;
+      END IF;
+
+      SET sum_delayTemp = (SELECT sum(returndelay.numberOfDayDelay)
+                           FROM returndelay
+                           WHERE userID = userIDTemp);
+      SET number_of_loan = (SELECT COUNT(*)
+                            FROM rentbridge
+                            WHERE userID = userIDTemp);
+      IF((sum_delayTemp/number_of_loan)< -5)
+      THEN
+        UPDATE bikeuser
+        SET memberlevel = 1
+        WHERE userID = userIDTemp;
+      END IF;
+    END LOOP get_userid;
+  END;
+
+CREATE PROCEDURE `update_performance_measurement`(IN `in_mesaurment_id`      INT(11), IN `in_date` DATETIME,
+                                                  IN `in_total_time`         DECIMAL(10),
+                                                  IN `in_db_procedure`       DECIMAL(10),
+                                                  IN `in_read_from_db_jdbc`  DECIMAL(10),
+                                                  IN `in_gson_to_json`       DECIMAL(10), IN `in_execute` DECIMAL(10),
+                                                  IN `in_gson_from_json`     DECIMAL(10),
+                                                  IN `in_read_one_bike`      DECIMAL(10), IN `in_comment` VARCHAR(500),
+                                                  IN `int_totalSize_data_mg` INT(11))
+  BEGIN
+    START TRANSACTION;
+    UPDATE prestanda_measurement_available_bikes
+    set date = in_date, total_time_sec = in_total_time,
+      db_procedure_sec = in_db_procedure, read_from_db_jdbc_sec = in_read_from_db_jdbc,
+      gson_to_json_sec = in_gson_to_json, execute_sec = in_execute,
+      gson_from_json_sec = in_gson_from_json, read_one_bike=in_read_one_bike,
+      comment=in_comment, total_size_data_mb = int_totalSize_data_mg WHERE measurament_id = in_mesaurment_id;
+    COMMIT;
+  END;
+
+CREATE PROCEDURE `update_user`(IN `in_fname` VARCHAR(50), IN `in_lname` VARCHAR(50), IN `in_memberlevel` VARCHAR(50),
+                               IN `in_email` VARCHAR(50), IN `in_phone` VARCHAR(50), IN `in_username` VARCHAR(50),
+                               IN `in_passw` VARCHAR(50))
+  BEGIN
+    DECLARE decUserID INT(10);
+    DECLARE decSalt VARBINARY(56);
+    IF EXISTS(SELECT 1 from bikeuser WHERE username=in_username)
+    THEN
+      set decUserID = (SELECT userID FROM bikeuser WHERE username=in_username);
+      set decSalt = (SELECT salt FROM passw WHERE userID=decUserID);
+      UPDATE passw SET passw = AES_ENCRYPT(in_passw,decSalt) WHERE userID=decUserID;
+      UPDATE bikeuser SET fname = in_fname, lname = in_lname, email = in_email,
+        memberlevel = in_memberlevel, phone = in_phone,
+        passw_id = (SELECT passw_id FROM passw WHERE userID=decUserID)
+      WHERE userID = decUserID;
+      SELECT 1 as confirm;
+    ELSE
+      SELECT 0 as confirm;
+    END IF;
+  END;
+
+CREATE PROCEDURE `users_current_bikes`(IN `userIDIn` INT(11))
+  BEGIN
+
+    SELECT DISTINCT * FROM bike_object
+      JOIN rentbridge ON bike_object.bikeID = rentbridge.bikeID
+    WHERE dayOfActualReturn IS NULL
+          AND userID = userIDIn ;
+    COMMIT;
+  END;
+
+CREATE FUNCTION `users_percent`(`in_gender` VARCHAR(20))
+  RETURNS DECIMAL(5, 2)
+  BEGIN
+    DECLARE return_value DECIMAL(5,2);
+    SET return_value = ((select count(userID) FROM bikeuser WHERE gender=in_gender)/number_of_users())*100;
+    RETURN return_value;
+  END;
+
+CREATE PROCEDURE `users_total_loan`(IN `userIDIn` INT(11))
+  BEGIN
+    SELECT bikeID FROM rentbridge WHERE userID = userIDIn;
+  END;
+
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `bike_object` AS select `bike`.`bikeID` AS `bikeID`,`bike`.`modelyear` AS `modelyear`,`bike`.`color` AS `color`,`bike`.`image` AS `image`,`bike`.`imageFileName` AS `imageFileName`,`bike`.`size` AS `size`,`type`.`typeName` AS `typeName`,`bike`.`state` AS `state`,`brand`.`brandname` AS `brandname` from ((`bike` join `brand` on((`bike`.`brandid` = `brand`.`brandid`))) join `type` on((`bike`.`typeID` = `type`.`typeID`)));
+CREATE ALGORITHM=UNDEFINED DEFINER=`rille`@`192.168.1.%` SQL SECURITY DEFINER VIEW `simpel_user` AS select `bikeuser`.`userID` AS `user_id`,`bikeuser`.`username` AS `user_name`,`bikeuser`.`gender` AS `gender`,`get_category`(`bikeuser`.`birth_year`) AS `category` from `bikeuser`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`rille`@`192.168.1.%` SQL SECURITY DEFINER VIEW `statistic_view` AS select `get_total_num_bikes`() AS `total_num_of_bikes`,((`num_of_curr_available_bikes_2`() / `get_total_num_bikes`()) * 100) AS `available_bikes_percent`,((`num_of_usable_bikes`() / `get_total_num_bikes`()) * 100) AS `usable_bikes_percent`,`bike_maintenance_percent`() AS `maintenance_percent`,`disabled_bikes_percent`() AS `disabled_percent`,`number_of_users`() AS `total_number_of_users`,`users_percent`('Male') AS `male_users_percent`,`users_percent`('Female') AS `female_users_percent`,`users_percent`('Other') AS `other_users_percent`,`category_percent`('Male',20,30) AS `male_20_to_30_percent`,`category_percent`('Male',30,40) AS `male_30_to_40_percent`,`category_percent`('Male',40,50) AS `male_40_to_50_percent`,`category_percent`('Male',50,130) AS `male_50_or_more_percent`,`category_percent`('Female',20,30) AS `female_20_to_30_percent`,`category_percent`('Female',30,40) AS `female_30_to_40_percent`,`category_percent`('Female',40,50) AS `female_40_to_50_percent`,`category_percent`('Female',50,130) AS `female_50_or_more_percent`,`category_percent`('Other',20,30) AS `other_20_to_30_percent`,`category_percent`('Other',30,40) AS `other_30_to_40_percent`,`category_percent`('Other',40,50) AS `other_40_to_50_percent`,`category_percent`('Other',50,130) AS `other_50_or_more_percent`,`new_loans_30_days_back_total`() AS `new_loans_30_days_back_total`,`new_loans_30_days_back_percent`('Male') AS `new_loans_30_days_back_male_percent`,`new_loans_30_days_back_percent`('Female') AS `new_loans_30_days_back_female_percent`,`new_loans_30_days_back_percent`('Other') AS `new_loans_30_days_back_other_percent`,`most_active_user_group_total`() AS `most_active_user_group_total`,`least_active_user_group_total`() AS `least_active_user_group_total`,`most_active_user_group_30_days_back`() AS `most_active_user_group_30_days_back`,`least_active_user_group_30_days_back`() AS `least_active_user_group_30_days_back`,`loans_in_order`(1) AS `nr_1_popular_bike`,`loans_in_order`(2) AS `nr_2_popular_bike`,`loans_in_order`(3) AS `nr_3_popular_bike`,`loans_in_order`(4) AS `nr_4_popular_bike`,`loans_in_order`(5) AS `nr_5_popular_bike`,`loans_in_order_least_popular`(1) AS `nr_1_least_popular_bike`,`b`.`username` AS `generated_by`,`b`.`userID` AS `generated_by_id` from `bikeuser` `b` where (`b`.`memberlevel` = 10);
+
+
+
+CREATE DEFINER=`root`@`localhost` EVENT `check_sessions` ON SCHEDULE EVERY 1 HOUR STARTS '2017-01-13 15:40:58' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+  CALL check_open_sessions();
+  INSERT INTO event_occured (time, message) VALUE ( now(), 'check_open_session körs');
+END;
+
+CREATE DEFINER=`root`@`localhost` EVENT `update_memberlevel_event` ON SCHEDULE EVERY 12 HOUR STARTS '2017-01-13 15:43:11' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+  CALL update_memberlevel();
+  INSERT INTO event_occured (time, message) VALUE ( now(), 'update_memberlevel() körs');
+END;
+
+

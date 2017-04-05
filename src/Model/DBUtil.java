@@ -60,8 +60,6 @@ static {
         System.out.println("Ulrikas inloggning");
           try {
               Class.forName("com.mysql.jdbc.Driver");
-              System.out.println("Vad är detta, credMap ?   "+ credMap.get("CONN_STRING_Ulrika"));
-              System.out.println("driver nnn " + credMap.get("CONN_STRING_Ulrika") + credMap.get("USERNAME_Ulrika") + credMap.get("PASSWORD_Ulrika"));
              return DriverManager.getConnection(credMap.get("CONN_STRING_Ulrika"), credMap.get("USERNAME_Ulrika"), credMap.get("PASSWORD_Ulrika"));
 
           } catch (ClassNotFoundException e) {
