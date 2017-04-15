@@ -15,6 +15,7 @@ import java.util.Map;
  * @since 2016-09-16
  */
 public class AccessBike {
+    private static long totalTimeSearchAvailableBikes;
     public static boolean returnBike(int bikeID, int userID) {
         System.out.println("bike " + bikeID + " user " + userID);
         DBType dataBase = null;
@@ -91,9 +92,10 @@ public class AccessBike {
             Class.forName("com.mysql.jdbc.Driver");
             conn = DBUtil.getConnection(dataBase);
             conn.setAutoCommit(false);
-            String sql = "CALL search_available_bikes()";
-            PreparedStatement ps = conn.prepareStatement(sql);
+            String sql = "CALL search_available_bikes(?)";
+            CallableStatement ps = conn.prepareCall(sql);
             ResultSet rs = ps.executeQuery();
+            ps.registerOutParameter(1, Types.BIGINT);
             int i = 0;
             while (rs.next()) {
                 i++;
@@ -111,7 +113,9 @@ public class AccessBike {
                 b.setBrandName(rs.getString("brandname"));
                 b.setImageFileName(rs.getString("imageFileName"));
                 availableBikes.add(b);
+
             }
+             totalTimeSearchAvailableBikes = ps.getLong(1);
             conn.commit();
 
         } catch (Exception e) {
@@ -427,6 +431,10 @@ public class AccessBike {
             e.printStackTrace();
         }
         return returnInt;
-
     }
+
+    public static long getTotalTimeSearchAvailableBikes() {
+        return totalTimeSearchAvailableBikes;
+    }
+
 }

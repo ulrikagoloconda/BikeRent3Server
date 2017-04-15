@@ -3,6 +3,7 @@ package Interfaces;
 import Model.Bike;
 import Model.BikeType;
 import Model.BikeUser;
+import Model.PrestandaMesaurment;
 
 
 import java.sql.SQLException;
@@ -42,4 +43,5 @@ public interface DBAccess{
     int getTotalNumOfbikes();
     int getNumOfCurrentAvailableBikes();
     boolean insertNewUser(String fname, String lname, int memberlevel, Year year, String email, int phone, String username, String gender, String passw);
+    int insertPrestandaMesaurment(PrestandaMesaurment prestandaMesaurment);
 }

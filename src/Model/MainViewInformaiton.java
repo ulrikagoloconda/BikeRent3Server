@@ -18,6 +18,7 @@ public class MainViewInformaiton {
     private BikeUser alteredUser;
     private Bike newBike;
     private int rentedBikes;
+    private PrestandaMesaurment prestandaMesaurment;
 
 
 
@@ -110,6 +111,14 @@ public class MainViewInformaiton {
 
     public void setRentedBikes(int rentedBikes) {
         this.rentedBikes = rentedBikes;
+    }
+
+    public PrestandaMesaurment getPrestandaMesaurment() {
+        return prestandaMesaurment;
+    }
+
+    public void setPrestandaMesaurment(PrestandaMesaurment prestandaMesaurment) {
+        this.prestandaMesaurment = prestandaMesaurment;
     }
 }
 

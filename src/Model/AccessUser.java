@@ -257,7 +257,6 @@ public class AccessUser {
 
 
     public static boolean startSession(String auth, int userID) {
-        System.out.println(userID + " i start session userid ");
         boolean returnBool = false;
         DBType dataBase = null;
         Connection conn = null;

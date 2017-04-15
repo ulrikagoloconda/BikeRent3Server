@@ -79,7 +79,12 @@ public class DBAccessImpl implements DeleteUser, DBAccess {
         return AccessUser.insertNewUser(fname, lname, memberlevel, year, email, phone, username, gender, passw);
       }
 
-  @Override
+    @Override
+    public int insertPrestandaMesaurment(PrestandaMesaurment prestandaMesaurment) {
+        return AcccesPrestandaMesaurment.insertMesaurment(prestandaMesaurment);
+    }
+
+    @Override
   public ArrayList<Bike> getAllBikes() {
     return AccessBike.getAllBikes();
   }

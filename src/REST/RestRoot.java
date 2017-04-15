@@ -156,18 +156,22 @@ public class RestRoot {
         try {
             Gson gson = new Gson();
             BikeUser user = gson.fromJson(json, BikeUser.class);
+            System.out.println(user.getMesaurment() + " mesaurment, är det null eller inte? ");
             String clientToken = dbAccess.readSessionToken(user.getUserID());
             if (user.getSessionToken().equals(clientToken)) {
                 long millisStartdb = Calendar.getInstance().getTimeInMillis();
+                double totalTimeSearch = (double)(AccessBike.getTotalTimeSearchAvailableBikes()/1000);
                 ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
+                user.getMesaurment().setDbProcedureSec(totalTimeSearch);
                 long millisStoptdb = Calendar.getInstance().getTimeInMillis();
                 System.out.println("Tidsåtgång läsa från databas: " + (millisStoptdb - millisStartdb) + " millisekunder" );
+                user.getMesaurment().setReadFromDbJdbcSec((millisStoptdb - millisStartdb)/1000);
                 Bikes bikeCollection = new Bikes();
+                bikeCollection.setPrestandaMesaurment(user.getMesaurment());
                 bikeCollection.setBikes(availableBikes);
                 long millisStart = Calendar.getInstance().getTimeInMillis();
                 String returnJson = gson.toJson(bikeCollection);
                 long millisStop = Calendar.getInstance().getTimeInMillis();
-                System.out.println("Tidsåtgång göra om från objekt till json: " + (millisStop - millisStart) + " millisekunder" );
                 return returnJson;
             } else {
                 return null;
@@ -387,6 +391,25 @@ public class RestRoot {
             return returnJson;
         } else {
             return null;
+        }
+    }
+
+    @POST
+    @Path("/prestandaMeasurment")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.TEXT_PLAIN)
+    public void prestandaMesaurment(String json) {
+        System.out.println("i prestanda Measurment");
+        try {
+            Gson gson = new Gson();
+            BikeUser user = gson.fromJson(json, BikeUser.class);
+            String clientToken = dbAccess.readSessionToken(user.getUserID());
+            if (user.getSessionToken().equals(clientToken)) {
+                int mesaurmentID = dbAccess.insertPrestandaMesaurment(user.getMesaurment());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
         }
     }
 }

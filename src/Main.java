@@ -5,6 +5,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -14,7 +17,38 @@ public class Main {
 private static ByteArrayInputStream stream;
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
-		AccessBike.executeBikeLoan(21,19);
+		PrestandaMesaurment pm = new PrestandaMesaurment();
+		//Integer measuramentId, LocalDateTime dateTime, double totalTimeSec, double perceivedTimeAvailableBikesSec,
+		// double dbProcedureSec, double readFromDbJdbcSec, double gsonToJsonSec, double executeSec,
+		// double gsonFromJsonSec, double readOneBike, String comment, double totalSizeDataMb) {
+
+		pm.setDateTime(null);
+		pm.setTotalTimeSec(2.433333333);
+		pm.setPerceivedTimeAvailableBikesSec(3.4);
+		pm.setDbProcedureSec(4.4);
+		pm.setReadFromDbJdbcSec(5.4);
+		pm.setGsonToJsonSec(6.4);
+		pm.setExecuteSec(7.4);
+		pm.setGsonFromJsonSec(8.4);
+		pm.setReadOneBike(9.4);
+		pm.setComment("Testar");
+		pm.setTotalSizeDataMb(10.4);
+
+		double d = 28786.079999999998;
+		String str = String.format("%1.2f", d);
+
+		AccessBike.selectAvailableBikes();
+
+		/*double bd = new BigDecimal(1.490514650355E12).setScale(4, RoundingMode.HALF_UP).doubleValue();
+		String ds = Double.toString(bd);
+		ds = ds.replace("E","");
+		bd = new BigDecimal(ds).setScale(4, RoundingMode.HALF_UP).doubleValue();
+
+
+		/*d = Double.valueOf(str);
+		System.out.println(d);
+		//AcccesPrestandaMesaurment.insertMesaurment(pm);
+		//AccessBike.executeBikeLoan(21,19);
 	/*	RestRoot restRoot = new RestRoot();
 		BikeUser user = new BikeUser();
 		user.setUserName("Demo123");
