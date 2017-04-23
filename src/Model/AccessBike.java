@@ -15,7 +15,6 @@ import java.util.Map;
  * @since 2016-09-16
  */
 public class AccessBike {
-    private static long totalTimeSearchAvailableBikes;
     public static boolean returnBike(int bikeID, int userID) {
         System.out.println("bike " + bikeID + " user " + userID);
         DBType dataBase = null;
@@ -79,8 +78,9 @@ public class AccessBike {
         return newBike;
     }
 
-    public static ArrayList<Bike> selectAvailableBikes() {
+    public static Bikes selectAvailableBikes() {
         ArrayList<Bike> availableBikes = new ArrayList<>();
+        Bikes bikes = new Bikes();
         DBType dataBase = null;
         Connection conn = null;
         if (PCRelated.isThisNiklasPC()) {
@@ -115,7 +115,11 @@ public class AccessBike {
                 availableBikes.add(b);
 
             }
-             totalTimeSearchAvailableBikes = ps.getLong(1);
+             long totalTimeSearchAvailableBikes = (ps.getLong(1)/1000);
+            bikes.setBikes(availableBikes);
+            PrestandaMeasurement prestandaMeasurement = new PrestandaMeasurement();
+            prestandaMeasurement.setDbProcedureSec(totalTimeSearchAvailableBikes);
+            bikes.setPrestandaMeasurement(prestandaMeasurement);
             conn.commit();
 
         } catch (Exception e) {
@@ -132,7 +136,7 @@ public class AccessBike {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return availableBikes;
+        return bikes;
     }
 
 
@@ -218,7 +222,6 @@ public class AccessBike {
             dataBase = DBType.Ulrika;
         }
         try {
-            System.out.println("Körs detta i accessBike execute ");
             conn = DBUtil.getConnection(dataBase);
             conn.setAutoCommit(false);
             String sql = "CALL execute_bike_loan(?,?,?,?)";
@@ -233,7 +236,6 @@ public class AccessBike {
             returnBike = getBikeByID(bikeID);
             returnBike.setDayOfReturn(dayOfReturn.toLocalDate());
             conn.commit();
-            System.out.println(returnBike.getDayOfReturn() + " day of return");
             return returnBike;
 
         } catch (Exception e) {
@@ -311,10 +313,8 @@ public class AccessBike {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 if (rs.getDate("dayOfActualReturn") == null && rs.getDate("dayOfRent") != null) {
-                    System.out.println("i access bike get singelbiek " + rs.getDate("dayOfActualReturn") + " " + rs.getDate(("dayOfRent")));
                     b.setAvailable(false);
                 } else {
-                    System.out.println("i access bike get singelbiek " + rs.getDate("dayOfActualReturn") + " " + rs.getDate(("dayOfRent")));
                     b.setAvailable(true);
                 }
                 b.setBrandName(rs.getString("brandname"));
@@ -398,10 +398,8 @@ public class AccessBike {
             String sql = "CALL get_num_of_total_bikes()";
             PreparedStatement ps = conn.prepareCall(sql);
             ResultSet rs = ps.executeQuery();
-            System.out.println("I access Bike get TOtla num ");
             if(rs.next()){
                 returnInt = rs.getInt("totalBikes");
-                System.out.println("I access Bike get TOtla num i next " + returnInt);
                 return returnInt;
             }
         }catch (Exception e){
@@ -432,9 +430,4 @@ public class AccessBike {
         }
         return returnInt;
     }
-
-    public static long getTotalTimeSearchAvailableBikes() {
-        return totalTimeSearchAvailableBikes;
-    }
-
 }

@@ -1,13 +1,9 @@
 package Interfaces;
 
-import Model.Bike;
-import Model.BikeType;
-import Model.BikeUser;
-import Model.PrestandaMesaurment;
+import Model.*;
 
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Map;
@@ -19,7 +15,7 @@ import java.util.Map;
  */
 public interface DBAccess{
     Bike insertNewBike(Bike newBike);
-    ArrayList<Bike> selectAvailableBikes();
+    Bikes selectAvailableBikes();
     ArrayList<BikeUser> searchUserByWildcard(String search);
     ArrayList<Bike> selectBikeByTypeBrandColor(String brand, String color, BikeType type);
     BikeUser alterUser(String userName, String passw, BikeUser updatedUser);
@@ -43,5 +39,5 @@ public interface DBAccess{
     int getTotalNumOfbikes();
     int getNumOfCurrentAvailableBikes();
     boolean insertNewUser(String fname, String lname, int memberlevel, Year year, String email, int phone, String username, String gender, String passw);
-    int insertPrestandaMesaurment(PrestandaMesaurment prestandaMesaurment);
+    int insertPrestandaMesaurment(PrestandaMeasurement prestandaMeasurement);
 }

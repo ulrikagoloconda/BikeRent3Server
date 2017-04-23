@@ -2,14 +2,12 @@
 package REST;
 
 import Interfaces.DBAccess;
-import Interfaces.InsertNewUser;
 import Model.*;
 import com.google.gson.Gson;
 import helpers.AuthHelper;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
@@ -37,13 +35,12 @@ public class RestRoot {
     user.setUserID(0);
     try {
       currentUser = dbAccess.logIn(user.getUserName(), user.getPassw());
-      System.out.println("I restroot login " + currentUser.getUserID());
       if (currentUser.getUserID() > 0) {
         ArrayList<Bike> currentBikes = dbAccess.getUsersCurrentBikes(currentUser.getUserID());
         currentUser.setCurrentBikeLoans(currentBikes);
         currentUser.setTotalBikeLoans(dbAccess.getUsersTotalLoan(currentUser.getUserID()));
-        System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
-            "get current. bikeloans: " + currentUser.getCurrentBikeLoans() + "phone : " + currentUser.getPhone());
+       /* System.out.println("getottalloans: " + currentUser.getTotalBikeLoans() +
+            "get current. bikeloans: " + currentUser.getCurrentBikeLoans() + "phone : " + currentUser.getPhone());*/
       }
 
     } catch (Exception e) {
@@ -151,24 +148,20 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public String getAvailableBikes(String json) {
-
-
         try {
             Gson gson = new Gson();
             BikeUser user = gson.fromJson(json, BikeUser.class);
-            System.out.println(user.getMesaurment() + " mesaurment, är det null eller inte? ");
             String clientToken = dbAccess.readSessionToken(user.getUserID());
             if (user.getSessionToken().equals(clientToken)) {
                 long millisStartdb = Calendar.getInstance().getTimeInMillis();
-                double totalTimeSearch = (double)(AccessBike.getTotalTimeSearchAvailableBikes()/1000);
-                ArrayList<Bike> availableBikes = dbAccess.selectAvailableBikes();
-                user.getMesaurment().setDbProcedureSec(totalTimeSearch);
+               Bikes bikes = dbAccess.selectAvailableBikes();
+                System.out.println("I rest root koll av bikes available " + bikes + " " + bikes.getPrestandaMeasurement().getDbProcedureSec());
+                user.getMesaurment().setDbProcedureSec(bikes.getPrestandaMeasurement().getDbProcedureSec());
                 long millisStoptdb = Calendar.getInstance().getTimeInMillis();
-                System.out.println("Tidsåtgång läsa från databas: " + (millisStoptdb - millisStartdb) + " millisekunder" );
                 user.getMesaurment().setReadFromDbJdbcSec((millisStoptdb - millisStartdb)/1000);
                 Bikes bikeCollection = new Bikes();
-                bikeCollection.setPrestandaMesaurment(user.getMesaurment());
-                bikeCollection.setBikes(availableBikes);
+                bikeCollection.setPrestandaMeasurement(user.getMesaurment());
+                bikeCollection.setBikes(bikes.getBikes());
                 long millisStart = Calendar.getInstance().getTimeInMillis();
                 String returnJson = gson.toJson(bikeCollection);
                 long millisStop = Calendar.getInstance().getTimeInMillis();
@@ -399,10 +392,10 @@ public class RestRoot {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     public void prestandaMesaurment(String json) {
-        System.out.println("i prestanda Measurment");
         try {
             Gson gson = new Gson();
             BikeUser user = gson.fromJson(json, BikeUser.class);
+            System.out.println("i rest root insert prestanda Measurment procedure tid " + user.getMesaurment().getDbProcedureSec());
             String clientToken = dbAccess.readSessionToken(user.getUserID());
             if (user.getSessionToken().equals(clientToken)) {
                 int mesaurmentID = dbAccess.insertPrestandaMesaurment(user.getMesaurment());

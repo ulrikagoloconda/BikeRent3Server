@@ -1,14 +1,8 @@
 ;import Interfaces.DBAccess;
 import Model.*;
-import REST.RestRoot;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import java.io.ByteArrayInputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.Calendar;
+import java.time.Year;
 import java.util.Random;
 
 //Denna klass ska bara anv�ndas f�r att testk�ra metoder
@@ -17,7 +11,7 @@ public class Main {
 private static ByteArrayInputStream stream;
 	public static void main(String[] args) {
 		System.out.println("Obs, k�rs fr�n main och inte som server ");
-		PrestandaMesaurment pm = new PrestandaMesaurment();
+		PrestandaMeasurement pm = new PrestandaMeasurement();
 		//Integer measuramentId, LocalDateTime dateTime, double totalTimeSec, double perceivedTimeAvailableBikesSec,
 		// double dbProcedureSec, double readFromDbJdbcSec, double gsonToJsonSec, double executeSec,
 		// double gsonFromJsonSec, double readOneBike, String comment, double totalSizeDataMb) {
@@ -36,8 +30,11 @@ private static ByteArrayInputStream stream;
 
 		double d = 28786.079999999998;
 		String str = String.format("%1.2f", d);
+		Year year = Year.now();
 
-		AccessBike.selectAvailableBikes();
+		AccessUser.insertNewUser("DBUser", "DBUser", 10,year,"dbuser@hotmail.com",07000000,"DBUser", "Annat","DBUser");
+		//AccessBike.selectAvailableBikes();
+		//AcccesPrestandaMesaurment.insertMesaurment(pm);
 
 		/*double bd = new BigDecimal(1.490514650355E12).setScale(4, RoundingMode.HALF_UP).doubleValue();
 		String ds = Double.toString(bd);

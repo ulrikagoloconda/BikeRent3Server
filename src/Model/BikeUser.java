@@ -19,7 +19,7 @@ public class BikeUser {
     private String sessionToken;
     private ArrayList<Bike> currentBikeLoans;
     private ArrayList<Integer> totalBikeLoans;
-    private PrestandaMesaurment mesaurment;
+    private PrestandaMeasurement mesaurment;
 
     public BikeUser() {
         this.sessionToken= "-1";
@@ -162,11 +162,11 @@ public class BikeUser {
         this.birthYear = birthYear;
     }
 
-    public PrestandaMesaurment getMesaurment() {
+    public PrestandaMeasurement getMesaurment() {
         return mesaurment;
     }
 
-    public void setMesaurment(PrestandaMesaurment mesaurment) {
+    public void setMesaurment(PrestandaMeasurement mesaurment) {
         this.mesaurment = mesaurment;
     }
 }
@@ -193,7 +193,7 @@ public class BikeUser {
     private String sessionToken;
     private ArrayList<Bike> currentBikeLoans;
     private ArrayList<Integer> totalBikeLoans;
-    private PrestandaMesaurment mesaurment;
+    private PrestandaMeasurement mesaurment;
 
 
     public BikeUser() {
@@ -327,11 +327,11 @@ public class BikeUser {
         this.birthYear = birthYear;
     }
 
-    public PrestandaMesaurment getMesaurment() {
+    public PrestandaMeasurement getMesaurment() {
         return mesaurment;
     }
 
-    public void setMesaurment(PrestandaMesaurment mesaurment) {
+    public void setMesaurment(PrestandaMeasurement mesaurment) {
         this.mesaurment = mesaurment;
     }
 }*/

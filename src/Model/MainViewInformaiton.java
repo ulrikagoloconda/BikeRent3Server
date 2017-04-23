@@ -1,7 +1,5 @@
 package Model;
 
-import java.io.ByteArrayInputStream;
-
 /**
  * Created by Goloconda on 2016-12-02.
  */
@@ -18,7 +16,7 @@ public class MainViewInformaiton {
     private BikeUser alteredUser;
     private Bike newBike;
     private int rentedBikes;
-    private PrestandaMesaurment prestandaMesaurment;
+    private PrestandaMeasurement prestandaMeasurement;
 
 
 
@@ -113,12 +111,12 @@ public class MainViewInformaiton {
         this.rentedBikes = rentedBikes;
     }
 
-    public PrestandaMesaurment getPrestandaMesaurment() {
-        return prestandaMesaurment;
+    public PrestandaMeasurement getPrestandaMeasurement() {
+        return prestandaMeasurement;
     }
 
-    public void setPrestandaMesaurment(PrestandaMesaurment prestandaMesaurment) {
-        this.prestandaMesaurment = prestandaMesaurment;
+    public void setPrestandaMeasurement(PrestandaMeasurement prestandaMeasurement) {
+        this.prestandaMeasurement = prestandaMeasurement;
     }
 }
 

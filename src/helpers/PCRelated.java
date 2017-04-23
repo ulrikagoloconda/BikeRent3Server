@@ -12,7 +12,6 @@ import java.awt.*;
 public class PCRelated {
 
   public static boolean isThisNiklasPC() {
-    System.out.println("userPC: " + (System.getProperty("user.name")).toUpperCase());
     return (System.getProperty("user.name")).toUpperCase().contains("NIK");
   }
 

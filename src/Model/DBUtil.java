@@ -49,7 +49,6 @@ static {
 
 
     public static Connection getConnection(DBType dbType) throws SQLException {
-    System.out.println("in model/dbutil");
     if (helpers.PCRelated.isThisNiklasPC()) {
       dbType = DBType.Niklas;
     } else {
@@ -57,7 +56,6 @@ static {
     }
     switch (dbType) {
       case Ulrika:
-        System.out.println("Ulrikas inloggning");
           try {
               Class.forName("com.mysql.jdbc.Driver");
              return DriverManager.getConnection(credMap.get("CONN_STRING_Ulrika"), credMap.get("USERNAME_Ulrika"), credMap.get("PASSWORD_Ulrika"));

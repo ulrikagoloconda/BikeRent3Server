@@ -2,10 +2,8 @@ package Model;
 
 import Interfaces.DBAccess;
 import Interfaces.DeleteUser;
-import Interfaces.InsertNewUser;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Map;
@@ -22,7 +20,7 @@ public class DBAccessImpl implements DeleteUser, DBAccess {
     }
 
     @Override
-    public ArrayList<Bike> selectAvailableBikes() {
+    public Bikes selectAvailableBikes() {
        return AccessBike.selectAvailableBikes();
     }
 
@@ -80,8 +78,9 @@ public class DBAccessImpl implements DeleteUser, DBAccess {
       }
 
     @Override
-    public int insertPrestandaMesaurment(PrestandaMesaurment prestandaMesaurment) {
-        return AcccesPrestandaMesaurment.insertMesaurment(prestandaMesaurment);
+    public int insertPrestandaMesaurment(PrestandaMeasurement prestandaMeasurement) {
+        return AcccesPrestandaMesaurment.insertMesaurment(prestandaMeasurement);
+
     }
 
     @Override
