@@ -109,28 +109,22 @@ public class RestRoot {
 
       if (mvi.getOldUser().getSessionToken().equals(clientToken)) {
           try {
-              isUpdateUserOK = dbAccess.UpdateUser(
-                      //String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password
-                      //isUpdateUserOK = dbAccess.UpdateUser(
-                      // currentUser.getfName(),
-                      // currentUser.getlName(),
-                      // in_memberlevel,
-                      // currentUser.getEmail(),
-                      // currentUser.getPhone(),
-                      // currentUser.getUserName(),
-                      // pw..);
-                      //AccessUser.UpdateUser("golo","golo",10,"gologologolo@golo.com",400,"Ulrika", "Golo");
-                      mvi.getAlteredUser().getfName(),
+              String gender = mvi.getAlteredUser().getGender();
+              if(gender.equals("Kvinna")){
+                  gender="Female";
+              }else if(gender.equals("Man")){
+                  gender="Male";
+              }else {
+                  gender="Other";
+              }
+              isUpdateUserOK = dbAccess.UpdateUser(mvi.getAlteredUser().getfName(),
                       mvi.getAlteredUser().getlName(),
                       mvi.getAlteredUser().getMemberLevel(),
                       mvi.getAlteredUser().getEmail(),
                       mvi.getAlteredUser().getPhone(),
                       mvi.getOldUser().getUserName(),
+                      gender,
                       mvi.getAlteredUser().getPassw());
-              System.out.println("passw: "+ mvi.getAlteredUser().getPassw());
-
-              System.out.println("update ?: " + isUpdateUserOK);
-
 
           } catch (Exception e) {
               e.printStackTrace();

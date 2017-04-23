@@ -24,7 +24,6 @@ private static ByteArrayInputStream stream;
 		pm.setGsonToJsonSec(6.4);
 		pm.setExecuteSec(7.4);
 		pm.setGsonFromJsonSec(8.4);
-		pm.setReadOneBike(9.4);
 		pm.setComment("Testar");
 		pm.setTotalSizeDataMb(10.4);
 
@@ -32,7 +31,14 @@ private static ByteArrayInputStream stream;
 		String str = String.format("%1.2f", d);
 		Year year = Year.now();
 
-		AccessUser.insertNewUser("DBUser", "DBUser", 10,year,"dbuser@hotmail.com",07000000,"DBUser", "Annat","DBUser");
+		int j = 37889;
+		int k = 37889 +700;
+		for(int i = j; i<k; i++ ) {
+			//deletBikes(i);
+		}
+
+		//AccessUser.UpdateUser("DBUser", "DBUser", 10,"dbuser@hotmail.com",07000000,"DBUser", "Female","DBUser");
+		//AccessUser.insertNewUser("DBUser", "DBUser", 10,year,"dbuser@hotmail.com",07000000,"DBUser", "Annat","DBUser");
 		//AccessBike.selectAvailableBikes();
 		//AcccesPrestandaMesaurment.insertMesaurment(pm);
 

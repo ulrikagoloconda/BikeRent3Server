@@ -210,8 +210,9 @@ public class AccessUser {
     }
 
 
-    public static boolean UpdateUser(String fname, String lname, int memberlevel, String email, int phone, String username, String passw) {
-        String SQLInsertUser = "CALL update_user(?, ?, ?, ?, ?, ?, ?)";
+    public static boolean UpdateUser(String fname, String lname, int memberlevel, String email, int phone, String username, String gender, String passw) {
+        String SQLInsertUser = "CALL update_user(?, ?, ?, ?, ?, ?, ?,?)";
+        System.out.println("Gender i access User " + gender);
         ResultSet rs = null;
         DBType dataBase = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
@@ -229,7 +230,13 @@ public class AccessUser {
             stmt.setString(4, email);
             stmt.setInt(5, phone);
             stmt.setString(6, username);
-            stmt.setString(7, passw);
+            stmt.setString(7, gender);
+            stmt.setString(8, passw);
+
+           /* IN `in_fname`  VARCHAR(50), IN `in_lname` VARCHAR(50), IN `in_memberlevel` VARCHAR(50),
+                    IN `in_email`  VARCHAR(50), IN `in_phone` VARCHAR(50), IN `in_username` VARCHAR(50),
+                    IN `in_gender` VARCHAR(50), IN `in_passw` VARCHAR(50)*/
+
             rs = stmt.executeQuery();
             int nrFound = 0;
             while (rs.next()) {

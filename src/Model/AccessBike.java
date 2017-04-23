@@ -16,7 +16,6 @@ import java.util.Map;
  */
 public class AccessBike {
     public static boolean returnBike(int bikeID, int userID) {
-        System.out.println("bike " + bikeID + " user " + userID);
         DBType dataBase = null;
         Connection conn = null;
         if (helpers.PCRelated.isThisNiklasPC()) {
@@ -115,10 +114,12 @@ public class AccessBike {
                 availableBikes.add(b);
 
             }
-             long totalTimeSearchAvailableBikes = (ps.getLong(1)/1000);
+            long totalTimeSearchAvailableBikes = (ps.getLong(1) / 1000);
+            Long totalLong = new Long(totalTimeSearchAvailableBikes);
+            double serachTotal = totalLong.doubleValue();
             bikes.setBikes(availableBikes);
             PrestandaMeasurement prestandaMeasurement = new PrestandaMeasurement();
-            prestandaMeasurement.setDbProcedureSec(totalTimeSearchAvailableBikes);
+            prestandaMeasurement.setDbProcedureSec(serachTotal);
             bikes.setPrestandaMeasurement(prestandaMeasurement);
             conn.commit();
 

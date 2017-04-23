@@ -89,8 +89,8 @@ public class DBAccessImpl implements DeleteUser, DBAccess {
   }
 
   @Override
-  public boolean UpdateUser(String fName, String lName, int in_memberlevel, String email, int phone, String userName, String password) throws SQLException {
-    return AccessUser.UpdateUser(fName, lName, in_memberlevel, email, phone, userName, password);
+  public boolean UpdateUser(String fName, String lName, int in_memberlevel, String email, int phone, String userName, String gender, String password) throws SQLException {
+    return AccessUser.UpdateUser(fName, lName, in_memberlevel, email, phone, userName, gender, password);
   }
 
   @Override
